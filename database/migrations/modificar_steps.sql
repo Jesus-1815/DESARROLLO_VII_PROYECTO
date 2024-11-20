@@ -1,0 +1,1 @@
+ALTER TABLE steps MODIFY step_number INT NOT NULL DEFAULT 1;
