@@ -3,10 +3,10 @@
 ob_start(); 
 ?>
 <div class="task-form">
-    <h2>Crear Nueva Tarea</h2>
+    <h2>Crear Nueva Receta</h2>
     <form action="index.php?action=create" method="post">
-        <input type="text" name="title" placeholder="Título de la tarea" required>
-        <button type="submit" class="btn">Crear Tarea</button>
+        <input type="text" name="title" placeholder="Título de la receta" required>
+        <button type="submit" class="btn">Crear Receta</button>
     </form>
     <br>
     <a href="index.php" class="btn">Volver</a>

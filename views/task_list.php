@@ -3,15 +3,15 @@
 ob_start(); 
 ?>
 <div class="task-list">
-    <h2>Mis Tareas</h2>
-    <a href="index.php?action=create" class="btn">Nueva Tarea</a>
+    <h2>Mis Recetas</h2>
+    <a href="index.php?action=create" class="btn">Nueva Receta</a>
     <ul>
-        <?php foreach ($tasks as $task): ?>
-            <li class="<?= $task['is_completed'] ? 'completed' : '' ?>">
-                <span><?= htmlspecialchars($task['title']) ?></span>
+        <?php foreach ($recipes as $recipe): ?>
+            <li class="<?= $recipe['is_completed'] ? 'completed' : '' ?>">
+                <span><?= htmlspecialchars($recipe['title']) ?></span>
                 <div>
-                    <a href="index.php?action=toggle&id=<?= $task['id'] ?>" class="btn">
-                        <?= $task['is_completed'] ? '✓' : '○' ?>
+                    <a href="index.php?action=toggle&id=<?= $recipe['id'] ?>" class="btn">
+                        <?= $recipe['is_completed'] ? '✓' : '○' ?>
                     </a>
                     <a href="index.php?action=delete&id=<?= $task['id'] ?>" class="btn" onclick="return confirm('¿Eliminar esta tarea?')">🗑</a>
                 </div>
