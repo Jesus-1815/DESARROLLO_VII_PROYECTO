@@ -7,12 +7,10 @@ ob_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar Receta</title>
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/assets/css/style.css">
-
-    
 </head>
 <body>
     <h1>Agregar Receta</h1>
-    <form action="RecipeManager.php" method="POST" enctype="multipart/form-data">
+    <form action="index.php?action=store" method="POST" enctype="multipart/form-data">
         <label for="recipe-name">Nombre de la receta:</label>
         <input type="text" id="recipe-name" name="recipe_name" required>
 

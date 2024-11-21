@@ -8,11 +8,6 @@ class RecipeIngredientManager {
         $this->db = $db;
     }
 
-    public function addIngredientToRecipe($recipeId, $ingredientId, $quantity) {
-        $stmt = $this->db->prepare("INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)");
-        return $stmt->execute([$recipeId, $ingredientId, $quantity]);
-    }
-
     public function getIngredientsByRecipe($recipeId) {
         $stmt = $this->db->prepare("
             SELECT ri.*, i.name 

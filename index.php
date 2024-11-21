@@ -1,5 +1,4 @@
 <?php
-// Enable error reporting
 session_start();
 
 // Verifica si el usuario ha iniciado sesión
@@ -8,52 +7,70 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Incluye archivos necesarios
+require_once 'config.php';
+require_once 'src/Database.php';
+require_once 'src/RecipeManager.php';
+require_once 'src/Recipe.php';  // Asegúrate de incluir la clase Recipe
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Define the base path for includes
-define('BASE_PATH', __DIR__ . '/');
-
-// Include the configuration file
-require_once BASE_PATH . 'config.php';
-
-// Include necessary files
-require_once BASE_PATH . 'src/Database.php';
-require_once BASE_PATH . 'src/RecipeManager.php';
-require_once BASE_PATH . 'src/Recipe.php';
-
-// Create an instance of recipeManager
+// Instancia del RecipeManager
 $recipeManager = new RecipeManager();
 
-// Get the action from the URL, default to 'list' if not set
+// Manejo de acciones desde la URL
 $action = $_GET['action'] ?? 'list';
 
-// Handle different actions
 switch ($action) {
     case 'create':
+        // Redirige al formulario de nueva receta
+        require 'views/task_form.php';
+        break;
+
+    case 'store':
+        // Procesa el formulario para guardar una nueva receta
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $recipeManager->createRecipe ($_POST['user_id'],
-            $_POST['title'],
-            $_POST['description'],
-            $_POST['prep_time'],
-            $_POST['steps']);
-            header('Location: ' . BASE_URL);
+            $userId = $_SESSION['user_id']; // El ID del usuario en sesión
+            $title = $_POST['recipe_name'];
+            $description = $_POST['description'];
+            $prepTime = $_POST['prep_time'];
+            $steps = $_POST['steps'];
+
+            // Guarda la receta
+            $recipeId = $recipeManager->createRecipe($userId, $title, $description, $prepTime, $steps);
+
+            // Guarda los ingredientes asociados
+            $quantities = $_POST['quantity'];
+            $units = $_POST['unit'];
+            $ingredients = $_POST['ingredient'];
+
+            foreach ($ingredients as $index => $ingredientName) {
+                $quantity = $quantities[$index];
+                $unit = $units[$index];
+                $recipeManager->addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit);
+            }
+
+            // Redirige al índice después de guardar
+            header("Location: index.php");
             exit;
         }
-        require BASE_PATH . 'views/task_form.php';
         break;
-    /*case 'toggle':
-        $recipeManager->toggleTask($_GET['id']);
-        header('Location: ' . BASE_URL);
-        break;*/
+
     case 'delete':
-        $recipeManager->deleteRecipe($_GET['id']);
-        header('Location: ' . BASE_URL);
+        // Elimina una receta
+        if (isset($_GET['id'])) {
+            $recipeManager->deleteRecipe($_GET['id']);
+        }
+        header("Location: index.php");
         break;
+
     default:
+        // Muestra la lista de recetas
         $recipes = $recipeManager->getAllRecipes();
-        require BASE_PATH . 'views/task_list.php';
+        require 'views/task_list.php';
         break;
 }
+
+

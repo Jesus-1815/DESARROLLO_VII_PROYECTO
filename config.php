@@ -2,7 +2,6 @@
 
 // Function to read .env file
 function loadEnv($path) {
-    
     if(!file_exists($path)) {
         throw new Exception(".env file not found");
     }
@@ -29,7 +28,9 @@ function loadEnv($path) {
 loadEnv(__DIR__ . '/.env');
 
 // Define constants using environment variables
-define('BASE_URL', getenv('BASE_URL'));
+if (!defined('BASE_URL')) {
+    define('BASE_URL', getenv('BASE_URL'));
+}
 define('DB_HOST', getenv('DB_HOST'));
 define('DB_NAME', getenv('DB_NAME'));
 define('DB_USER', getenv('DB_USER'));
@@ -37,5 +38,3 @@ define('DB_PASS', getenv('DB_PASS'));
 
 // Derived constants
 define('PUBLIC_URL', BASE_URL . '/public');
-
-// You can add more configuration settings here
