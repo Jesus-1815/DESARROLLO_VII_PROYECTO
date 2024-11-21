@@ -7,9 +7,29 @@
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/assets/css/style.css">
 </head>
 <body>
-    <header>
-        <h1>Recetas App</h1>
-    </header>
+<div class="container">
+
+<header>
+    <div class="header-left">
+        <h2><?php $pageTitle = basename($_SERVER['PHP_SELF']) == 'index.php' ? 'Inicio' : 'Buscar Recetas'; echo $pageTitle; ?></h2>
+        <?php if ($pageTitle !== 'Inicio'): ?>
+            <a href="index.php" class="home-link">Volver al Inicio</a>
+        <?php endif; ?>
+    </div>
+
+    <div class="header-center">
+        <form class="search-bar" method="get" action="/PROYECTO/buscar_recetas.php">
+            <input type="text" name="query" placeholder="Buscar recetas...">
+            <button type="submit">Buscar</button>
+        </form>
+    </div>
+
+    <div class="header-right">
+        <a href="logout.php" class="logout-btn">Cerrar sesión</a>
+    </div>
+    
+</header>
+</div>
     <main>
         <?php echo $content; ?>
     </main>

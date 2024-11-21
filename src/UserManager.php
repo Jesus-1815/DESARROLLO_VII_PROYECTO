@@ -1,5 +1,6 @@
 <?php
 require_once 'Database.php';
+require_once 'User.php';
 
 class UserManager {
     private $db;
@@ -7,6 +8,7 @@ class UserManager {
     public function __construct() {
         $this->db = Database::getInstance()->getConnection();
     }
+    
     
     public function createUser($username, $email, $password) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -34,10 +36,11 @@ class UserManager {
         ]);
     }
 
-    public static function login($db, $username, $password) {
-        $stmt = $db->prepare("SELECT * FROM users WHERE username = ?");
-        $stmt->execute([$username]);
+    public  function login($email, $password) {
+        $stmt =$this->db->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        var_dump($user);
         if ($user && password_verify($password, $user['password'])) {
             return new User($user);
         }

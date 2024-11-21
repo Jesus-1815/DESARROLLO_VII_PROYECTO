@@ -95,7 +95,125 @@ footer {
     color: #fff;
     text-align: center;
     padding: 10px;
-    position: fixed;
+    position: relative;
     bottom: 0;
     width: 100%;
+}
+
+header {
+    
+    display: flex;
+    width: 85%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f4f4f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-left h2 {
+    font-size: 1.5em;
+    margin: 0;
+    color: #333;
+}
+
+.header-left .home-link {
+    margin-left: 10px;
+    color: #5cb85c;
+    text-decoration: none;
+    font-weight: bold;
+    width: 25%;
+}
+
+.header-center {
+    width: 45%;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.header-right {
+    width: 25%;
+    padding: 8px 15px;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/*search bar*/
+
+.search-bar {
+    display: flex;
+    margin-bottom: 20px;
+}
+.search-bar input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px 0 0 5px;
+    width: 80%;
+    outline: none;
+}
+.search-bar button {
+    padding: 10px;
+    background-color: #337ab7;
+    color: white;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.search-bar button:hover {
+    background-color: #286090;
+}
+
+/*recipe form*/
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.ingredient-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.ingredient-row input, .ingredient-row select {
+    flex: 1;
+}
+.actions {
+    display: flex;
+    gap: 10px;
+}
+button {
+    padding: 8px 12px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+button:hover {
+    background-color: #45a049;
+}
+button.remove {
+    background-color: #f44336;
+}
+button.remove:hover {
+    background-color: #d32f2f;
+}
+#submit-button {
+    background-color: #4CAF50; /* Color verde */
+    color: white; /* Texto blanco */
+    border: none; /* Sin bordes */
+    padding: 10px 15px; /* Espaciado interno */
+    font-size: 16px; /* Tamaño de fuente */
+    cursor: pointer; /* Icono de puntero */
+    border-radius: 4px; /* Bordes redondeados */
+    display: block; /* Asegura que se muestre */
+    margin-top: 20px; /* Separación superior */
+}
+
+#submit-button:hover {
+    background-color: #45a049; /* Color más oscuro al pasar el cursor */
 }

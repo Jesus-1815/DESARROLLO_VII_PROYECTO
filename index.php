@@ -1,5 +1,14 @@
 <?php
 // Enable error reporting
+session_start();
+
+// Verifica si el usuario ha iniciado sesión
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -15,7 +24,7 @@ require_once BASE_PATH . 'src/Database.php';
 require_once BASE_PATH . 'src/RecipeManager.php';
 require_once BASE_PATH . 'src/Recipe.php';
 
-// Create an instance of TaskManager
+// Create an instance of recipeManager
 $recipeManager = new RecipeManager();
 
 // Get the action from the URL, default to 'list' if not set
@@ -25,7 +34,7 @@ $action = $_GET['action'] ?? 'list';
 switch ($action) {
     case 'create':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-   $recipeManager->createRecipe ($_POST['user_id'],
+            $recipeManager->createRecipe ($_POST['user_id'],
             $_POST['title'],
             $_POST['description'],
             $_POST['prep_time'],
