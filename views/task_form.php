@@ -10,18 +10,17 @@ ob_start();
 </head>
 <body>
     <h1>Agregar Receta</h1>
-    <form action="index.php?action=store" method="POST" enctype="multipart/form-data">
+    <form action="<?php echo BASE_URL; ?>/index.php?action=store" method="POST" enctype="multipart/form-data">
         <label for="recipe-name">Nombre de la receta:</label>
-        <input type="text" id="recipe-name" name="recipe_name" required>
+        <input type="text" id="recipe-name" name="recipe_name" placeholder="Ej. Pastel de chocolate" maxlength="100" required>
 
         <label for="prep-time">Tiempo de preparación (en minutos):</label>
-        <input type="number" id="prep-time" name="prep_time" min="1" required>
+        <input type="number" id="prep-time" name="prep_time" min="1" max="500" required>
 
         <label>Ingredientes:</label>
         <div id="ingredients-container">
-            <!-- Fila de ejemplo -->
             <div class="ingredient-row">
-                <input type="number" name="quantity[]" placeholder="Cantidad" min="0" required>
+                <input type="number" name="quantity[]" placeholder="Cantidad" min="0" step="0.1" required>
                 <select name="unit[]" required>
                     <option value="tazas">Tazas</option>
                     <option value="oz">Onzas</option>
@@ -30,11 +29,11 @@ ob_start();
                     <option value="l">Litros</option>
                     <option value="gr">Gramos</option>
                     <option value="kg">Kilogramos</option>
-                    <option value="Cda">Cucharada</option>
-                    <option value="cdta">Cucharadita</option>
+                    <option value="Cda">Cucharadas</option>
+                    <option value="cdta">Cucharaditas</option>
                     <option value="u">Unidades</option>
                 </select>
-                <input type="text" name="ingredient[]" placeholder="Ingrediente" required>
+                <input type="text" name="ingredient[]" placeholder="Ingrediente" maxlength="50" required>
             </div>
         </div>
         <div class="actions">
@@ -42,14 +41,21 @@ ob_start();
             <button type="button" id="remove-ingredient" class="remove">Menos</button>
         </div>
 
-        <label for="photos">Fotos:</label>
-        <input type="file" id="photos" name="photos[]" accept="image/*" multiple>
+        <label for="steps">Pasos a seguir:</label>
+        <div id="steps-container">
+            <div class="step-row">
+                <textarea name="steps[]" rows="3" placeholder="Describe un paso" required></textarea>
+            </div>
+        </div>
+        <div class="actions">
+            <button type="button" id="add-step">Más</button>
+            <button type="button" id="remove-step" class="remove">Menos</button>
+        </div>
+
+        <!-- Eliminé la sección de fotos para ajustarme a tu petición -->
 
         <label for="description">Descripción:</label>
-        <textarea id="description" name="description" rows="3" required></textarea>
-
-        <label for="steps">Pasos a seguir:</label>
-        <textarea id="steps" name="steps" rows="5" required></textarea>
+        <textarea id="description" name="description" rows="3" placeholder="Ej. Receta especial para fiestas" required></textarea>
 
         <button type="submit" id="submit-button">Guardar Receta</button>
     </form>
@@ -58,6 +64,9 @@ ob_start();
         const ingredientsContainer = document.getElementById('ingredients-container');
         const addIngredientButton = document.getElementById('add-ingredient');
         const removeIngredientButton = document.getElementById('remove-ingredient');
+        const stepsContainer = document.getElementById('steps-container');
+        const addStepButton = document.getElementById('add-step');
+        const removeStepButton = document.getElementById('remove-step');
 
         // Agregar una fila de ingredientes
         addIngredientButton.addEventListener('click', () => {
@@ -65,7 +74,7 @@ ob_start();
             ingredientRow.classList.add('ingredient-row');
 
             ingredientRow.innerHTML = `
-                <input type="number" name="quantity[]" placeholder="Cantidad" min="0" required>
+                <input type="number" name="quantity[]" placeholder="Cantidad" min="0" step="0.1" required>
                 <select name="unit[]" required>
                     <option value="tazas">Tazas</option>
                     <option value="oz">Onzas</option>
@@ -74,11 +83,11 @@ ob_start();
                     <option value="l">Litros</option>
                     <option value="gr">Gramos</option>
                     <option value="kg">Kilogramos</option>
-                    <option value="Cda">Cucharada</option>
-                    <option value="cdta">Cucharadita</option>
+                    <option value="Cda">Cucharadas</option>
+                    <option value="cdta">Cucharaditas</option>
                     <option value="u">Unidades</option>
                 </select>
-                <input type="text" name="ingredient[]" placeholder="Ingrediente" required>
+                <input type="text" name="ingredient[]" placeholder="Ingrediente" maxlength="50" required>
             `;
 
             ingredientsContainer.appendChild(ingredientRow);
@@ -89,6 +98,26 @@ ob_start();
             const rows = ingredientsContainer.getElementsByClassName('ingredient-row');
             if (rows.length > 1) {
                 ingredientsContainer.removeChild(rows[rows.length - 1]);
+            }
+        });
+
+        // Agregar una fila de pasos
+        addStepButton.addEventListener('click', () => {
+            const stepRow = document.createElement('div');
+            stepRow.classList.add('step-row');
+
+            stepRow.innerHTML = `
+                <textarea name="steps[]" rows="3" placeholder="Describe un paso" required></textarea>
+            `;
+
+            stepsContainer.appendChild(stepRow);
+        });
+
+        // Eliminar la última fila de pasos
+        removeStepButton.addEventListener('click', () => {
+            const rows = stepsContainer.getElementsByClassName('step-row');
+            if (rows.length > 1) {
+                stepsContainer.removeChild(rows[rows.length - 1]);
             }
         });
     </script>
