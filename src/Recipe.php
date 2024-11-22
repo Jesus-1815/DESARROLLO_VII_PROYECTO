@@ -3,26 +3,33 @@
 class Recipe {
     private $id;
     private $user_id;
+    public $name;
     private $title;
     private $description;
     private $prep_time;
     private $steps;
+    public $ingredients = [];
     private $created_at;
 
     public function __construct(array $data) {
+        $this->name = $data['name'] ?? null; // Asigna 'name' desde $data
+        $this->ingredients = $data['ingredients'] ?? []; // Asigna 'ingredients' desde $data
+
+        // Asigna las demás propiedades con los datos proporcionados en $data
         $this->id = $data['id'] ?? null;
-        $this->user_id = $data['user_id'];
-        $this->title = $data['title'];
+        $this->user_id = $data['user_id'] ?? null;
+        $this->title = $data['title'] ?? null;
         $this->description = $data['description'] ?? null;
         $this->prep_time = $data['prep_time'] ?? null;
         $this->steps = $data['steps'] ?? null;
         $this->created_at = $data['created_at'] ?? null;
     }
+
+    // Métodos Getter
     public function getTitle(): string {
         return $this->title;
     }
 
-    // Getters
     public function getId() {
         return $this->id;
     }
@@ -30,7 +37,6 @@ class Recipe {
     public function getUserId() {
         return $this->user_id;
     }
-
 
     public function getDescription() {
         return $this->description;
@@ -44,10 +50,16 @@ class Recipe {
         return $this->steps;
     }
 
+    public function getIngredients() {
+        return $this->ingredients;
+    }
+
     public function getCreatedAt() {
         return $this->created_at;
     }
 }
+?>
+
 
 
 

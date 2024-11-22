@@ -51,5 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
     <?php if (isset($error)) echo "<p>$error</p>"; ?>
     <a href="registro.php">Registrarse</a>
+    <a href="forgot-password.php">¿Olvidaste tu contraseña?</a>
 </body>
 </html>

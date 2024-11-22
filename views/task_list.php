@@ -1,7 +1,6 @@
-<?php 
+<?php
 // Iniciamos el buffer de salida
-
-ob_start(); 
+ob_start();
 ?>
 <div class="task-list">
     <h2>Mis Recetas</h2>
@@ -14,7 +13,7 @@ ob_start();
                 <p><strong>Descripción:</strong> <?= htmlspecialchars($recipe->getDescription()) ?></p>
                 <div>
                     <a href="index.php?action=view&id=<?= $recipe->getId() ?>" class="btn">Ver</a>
-                    <a href="index.php?action=edit&id=<?= $recipe->getId() ?>" class="btn">Editar</a>
+                    <a href="index.php?action=edit&id=<?= $recipe->getId() ?>" class="btn">Editar</a> <!-- Enlace de editar -->
                     <a href="index.php?action=delete&id=<?= $recipe->getId() ?>" class="btn" onclick="return confirm('¿Eliminar esta receta?')">Eliminar</a>
                 </div>
             </li>

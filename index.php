@@ -31,31 +31,31 @@ switch ($action) {
 
     case 'store':
         // Procesa el formulario para guardar una nueva receta
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $userId = $_SESSION['user_id']; // El ID del usuario en sesión
-    $title = $_POST['recipe_name'];
-    $description = $_POST['description'];
-    $prepTime = $_POST['prep_time'];
-    $steps = $_POST['steps']; // Pasos de la receta enviados desde el formulario
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $userId = $_SESSION['user_id']; // El ID del usuario en sesión
+            $title = $_POST['recipe_name'];
+            $description = $_POST['description'];
+            $prepTime = $_POST['prep_time'];
+            $steps = $_POST['steps']; // Pasos de la receta enviados desde el formulario
 
-    // Guarda la receta
-    $recipeId = $recipeManager->createRecipe($userId, $title, $description, $prepTime, $steps);
+            // Guarda la receta
+            $recipeId = $recipeManager->createRecipe($userId, $title, $description, $prepTime, $steps);
 
-    // Guarda los ingredientes asociados (si los hay)
-    $quantities = $_POST['quantity'];
-    $units = $_POST['unit'];
-    $ingredients = $_POST['ingredient'];
+            // Guarda los ingredientes asociados (si los hay)
+            $quantities = $_POST['quantity'];
+            $units = $_POST['unit'];
+            $ingredients = $_POST['ingredient'];
 
-    foreach ($ingredients as $index => $ingredientName) {
-        $quantity = $quantities[$index];
-        $unit = $units[$index];
-        $recipeManager->addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit);
-    }
+            foreach ($ingredients as $index => $ingredientName) {
+                $quantity = $quantities[$index];
+                $unit = $units[$index];
+                $recipeManager->addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit);
+            }
 
-    // Redirige al índice después de guardar
-    header("Location: index.php");
-    exit;
-}
+            // Redirige al índice después de guardar
+            header("Location: index.php");
+            exit;
+        }
         break;
 
     case 'delete':
@@ -66,9 +66,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: index.php");
         break;
 
+    case 'edit':
+        // Redirige al formulario de edición de receta
+        if (isset($_GET['id'])) {
+            $recipe_id = $_GET['id'];
+            $recipe = $recipeManager->getRecipeById($recipe_id);
+
+            if ($recipe) {
+                require 'views/edit_recipe.php';  // Muestra el formulario de edición
+            } else {
+                // Si no existe la receta, redirige
+                header('Location: index.php');
+                exit();
+            }
+        }
+        break;
+
     default:
         // Muestra la lista de recetas
         $recipes = $recipeManager->getAllRecipes();
         require 'views/task_list.php';
         break;
 }
+?>

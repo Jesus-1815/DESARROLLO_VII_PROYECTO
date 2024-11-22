@@ -46,4 +46,54 @@ class UserManager {
         }
         return null;
     }
+
+    public function generateRecoveryToken($email) {
+        $db = Database::getInstance()->getConnection();
+        
+        // Verificar si el email existe
+        $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$user) {
+            throw new Exception("No existe una cuenta con este email.");
+        }
+        
+        // Generar token único
+        $token = bin2hex(random_bytes(32));
+        $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        
+        // Guardar token en la base de datos
+        $stmt = $db->prepare("INSERT INTO recovery_tokens (user_id, token, expiry) VALUES (?, ?, ?)");
+        $stmt->execute([$user['id'], $token, $expiry]);
+        
+        return $token;
+    }
+
+    public function verifyRecoveryToken($token) {
+        $db = Database::getInstance()->getConnection();
+        
+        $stmt = $db->prepare("
+            SELECT user_id 
+            FROM recovery_tokens 
+            WHERE token = ? 
+            AND expiry > NOW() 
+            AND used = FALSE
+        ");
+        $stmt->execute([$token]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updatePassword($userId, $newPassword) {
+        $db = Database::getInstance()->getConnection();
+        
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $db->prepare("UPDATE users SET password = ? WHERE id = ?");
+        $stmt->execute([$hashedPassword, $userId]);
+        
+        // Marcar el token como usado
+        $stmt = $db->prepare("UPDATE recovery_tokens SET used = TRUE WHERE user_id = ?");
+        $stmt->execute([$userId]);
+    }
 }
+

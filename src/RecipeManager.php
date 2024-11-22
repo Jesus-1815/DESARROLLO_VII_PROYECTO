@@ -15,8 +15,8 @@ class RecipeManager {
     // Crear o actualizar receta
     public function createRecipe($user_id, $title, $description, $prep_time, $steps, $recipe_id = null) {
         try {
-            // Si es una receta nueva (sin ID), insertamos una nueva receta
             if ($recipe_id) {
+                // Actualización de receta existente
                 $stmt = $this->db->prepare("
                     UPDATE recipes 
                     SET user_id = ?, title = ?, description = ?, prep_time = ? 
@@ -24,6 +24,7 @@ class RecipeManager {
                 ");
                 $stmt->execute([$user_id, $title, $description, $prep_time, $recipe_id]);
             } else {
+                // Creación de nueva receta
                 $stmt = $this->db->prepare("
                     INSERT INTO recipes (user_id, title, description, prep_time) 
                     VALUES (?, ?, ?, ?)
@@ -31,41 +32,41 @@ class RecipeManager {
                 $stmt->execute([$user_id, $title, $description, $prep_time]);
                 $recipe_id = $this->db->lastInsertId();  // Obtener el ID de la receta recién insertada
             }
-    
+
+            // Eliminar pasos existentes si es una actualización
+            if ($recipe_id) {
+                $stmt = $this->db->prepare("DELETE FROM recipe_steps WHERE recipe_id = ?");
+                $stmt->execute([$recipe_id]);
+            }
+
             // Guardar los pasos
             foreach ($steps as $stepText) {
-                // Inserta el paso con el recipe_id correspondiente
                 $stmt = $this->db->prepare("INSERT INTO steps (step_text, recipe_id) VALUES (?, ?)");
-                $stmt->execute([$stepText, $recipe_id]);  // Pasando el recipe_id aquí
+                $stmt->execute([$stepText, $recipe_id]);
                 $stepId = $this->db->lastInsertId();
-    
-                // Insertar la relación receta-paso
+
                 $stmt = $this->db->prepare("INSERT INTO recipe_steps (recipe_id, step_id) VALUES (?, ?)");
                 $stmt->execute([$recipe_id, $stepId]);
             }
-    
-            return $recipe_id;  // Devuelve el ID de la receta creada
+
+            return $recipe_id;
         } catch (Exception $e) {
             throw new Exception("Error creating recipe: " . $e->getMessage());
         }
     }
-    
 
     // Agregar ingrediente a la receta
     public function addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit) {
-        // Verifica si el ingrediente ya existe
         $stmt = $this->db->prepare("SELECT id FROM ingredients WHERE name = ?");
         $stmt->execute([$ingredientName]);
         $ingredientId = $stmt->fetchColumn();
 
-        // Si no existe, lo crea
         if (!$ingredientId) {
             $stmt = $this->db->prepare("INSERT INTO ingredients (name) VALUES (?)");
             $stmt->execute([$ingredientName]);
             $ingredientId = $this->db->lastInsertId();
         }
 
-        // Agrega el ingrediente a la receta
         $stmt = $this->db->prepare("
             INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
             VALUES (?, ?, ?, ?)
@@ -79,7 +80,6 @@ class RecipeManager {
         $stmt->execute([$id]);
         $recipe = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($recipe) {
-            // Obtener los pasos asociados
             $stmt = $this->db->prepare("
                 SELECT s.step_text 
                 FROM steps s 
@@ -133,7 +133,6 @@ class RecipeManager {
                     $stepId = $step['id'];
                 }
 
-                // Relacionar el paso con la receta
                 $stmt = $this->db->prepare("INSERT INTO recipe_steps (recipe_id, step_id) VALUES (?, ?)");
                 $stmt->execute([$id, $stepId]);
             }
@@ -144,6 +143,18 @@ class RecipeManager {
         }
     }
 
+    // Obtener ingredientes por receta
+    public function getIngredientsByRecipeId($recipe_id) {
+        $stmt = $this->db->prepare("
+            SELECT i.name, ri.quantity, ri.unit 
+            FROM ingredients i
+            JOIN recipe_ingredients ri ON i.id = ri.ingredient_id
+            WHERE ri.recipe_id = ?
+        ");
+        $stmt->execute([$recipe_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Eliminar receta
     public function deleteRecipe($id) {
         $this->stepManager->deleteStepsByRecipeId($id);
@@ -152,3 +163,4 @@ class RecipeManager {
     }
 }
 ?>
+
