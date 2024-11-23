@@ -29,35 +29,45 @@ switch ($action) {
         require 'views/task_form.php';
         break;
 
-    case 'store':
-        // Procesa el formulario para guardar una nueva receta
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $userId = $_SESSION['user_id']; // El ID del usuario en sesión
-            $title = $_POST['recipe_name'];
-            $description = $_POST['description'];
-            $prepTime = $_POST['prep_time'];
-            $ingredients = $_POST['ingredient'];
-            $steps = $_POST['steps']; // Pasos de la receta enviados desde el formulario
+        case 'store':
+            // Procesa el formulario para guardar una nueva receta
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $userId = $_SESSION['user_id']; // El ID del usuario en sesión
+                $title = $_POST['recipe_name'];
+                $description = $_POST['description'];
+                $prepTime = $_POST['prep_time'];
+                $ingredients = $_POST['ingredient'];
+                $steps = $_POST['steps']; // Pasos de la receta enviados desde el formulario
+        
+                $recipeId = $recipeManager->createRecipe($userId, $title, $description, $prepTime, $ingredients, $steps);
+                if (!$recipeId) {
+                 die("Error: No se pudo crear la receta.");
+                }
 
-            // Guarda la receta en la base de datos
-            $recipeManager->createRecipe($userId, $title, $description, $prepTime, $ingredients, $steps);
-            // Guarda los ingredientes asociados a la receta (si los hay)
-            $quantities = $_POST['quantity'];
-            $units = $_POST['unit'];
-            $ingredients = $_POST['ingredient'];
-
-            // Inserta cada ingrediente en la receta
-            foreach ($ingredients as $index => $ingredientName) {
-                $quantity = $quantities[$index];
-                $unit = $units[$index];
-                $recipeManager->addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit);
+                // Guarda los ingredientes asociados a la receta (si los hay)
+                $quantities = $_POST['quantity'];
+                $units = $_POST['unit'];
+        
+                // Inserta cada ingrediente en la receta
+                foreach ($ingredients as $index => $ingredientName) {
+                    $quantity = $quantities[$index];
+                    $unit = $units[$index];
+                    // Usa $recipeId obtenido al crear la receta
+                    $recipeManager->addIngredientToRecipe($recipeId, $ingredientName, $quantity);
+                    
+                }
+        
+                // Redirige al índice (lista de recetas) después de guardar
+                header("Location: index.php");
+                exit;
+               
             }
 
-            // Redirige al índice (lista de recetas) después de guardar
-            header("Location: index.php");
-            exit;
-        }
-        break;
+            
+            
+            
+            break;
+        
 
     case 'delete':
         // Elimina una receta

@@ -15,54 +15,29 @@ class RecipeManager {
     // Crear o actualizar receta
     public function createRecipe($userId, $title, $description, $prepTime, $ingredients, $steps) {
         try {
-            // Insertar la receta
             $query = "INSERT INTO recipes (user_id, title, description, prep_time) VALUES (?, ?, ?, ?)";
             $stmt = $this->db->prepare($query);
             $stmt->execute([$userId, $title, $description, $prepTime]);
-            
-            // Obtener el ID de la receta insertada
-            $recipeId = $this->db->lastInsertId(); // Obtén el ID de la receta recién insertada
-            
-            // Insertar los ingredientes en la tabla recipe_ingredients
-            foreach ($ingredients as $ingredientName) {
-                // Aquí necesitas obtener el ID del ingrediente, si ya existe en la base de datos
-                $query = "SELECT id FROM ingredients WHERE name = ?";
-                $stmt = $this->db->prepare($query);
-                $stmt->execute([$ingredientName]);
-                $ingredientId = $stmt->fetchColumn();
-                
-                if ($ingredientId) {
-                    // Si el ingrediente ya existe, lo insertamos en recipe_ingredients
-                    $query = "INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (?, ?)";
-                    $stmt = $this->db->prepare($query);
-                    $stmt->execute([$recipeId, $ingredientId]);
-                }
-            }
     
-            // Insertar los pasos en la tabla recipe_steps
-            foreach ($steps as $stepText) {
-                // Insertar paso
-                $query = "INSERT INTO steps (step_text, recipe_id) VALUES (?, ?)";
-                $stmt = $this->db->prepare($query);
-                $stmt->execute([$stepText, $recipeId]);
-                
-                // Obtener el ID del paso insertado
-                $stepId = $this->db->lastInsertId();
-                
-                // Insertar en recipe_steps para asociar el paso a la receta
-                $query = "INSERT INTO recipe_steps (recipe_id, step_id) VALUES (?, ?)";
-                $stmt = $this->db->prepare($query);
-                $stmt->execute([$recipeId, $stepId]);
-            }
+            // Obtener el ID de la receta recién creada
+            $recipeId = $this->db->lastInsertId();
     
+            // Aquí puedes insertar ingredientes y pasos si es necesario
+            return $recipeId; // ¡Devuelve el ID de la receta!
         } catch (Exception $e) {
             throw new Exception("Error creating recipe: " . $e->getMessage());
         }
     }
     
     
+    
     // Agregar ingrediente a la receta
-    public function addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit) {
+    public function addIngredientToRecipe($recipeId, $ingredientName, $quantity) {
+        if (!$recipeId) {
+            throw new Exception("El ID de la receta no puede ser NULL.");
+        }
+    
+        // Resto de la lógica
         $stmt = $this->db->prepare("SELECT id FROM ingredients WHERE name = ?");
         $stmt->execute([$ingredientName]);
         $ingredientId = $stmt->fetchColumn();
@@ -70,36 +45,41 @@ class RecipeManager {
         if (!$ingredientId) {
             $stmt = $this->db->prepare("INSERT INTO ingredients (name) VALUES (?)");
             $stmt->execute([$ingredientName]);
-            $ingredientId = $stmt->lastInsertId();
+            $ingredientId = $this->db->lastInsertId();
         }
     
-        $stmt = $this->db->prepare("
-            INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmt->execute([$recipeId, $ingredientId, $quantity, $unit]);
+        $stmt = $this->db->prepare("INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)");
+        $stmt->execute([$recipeId, $ingredientId, $quantity]);
     }
+    
     
     // Obtener receta por ID
     public function getRecipeById($id) {
+    try {
         $stmt = $this->db->prepare("SELECT * FROM recipes WHERE id = ?");
         $stmt->execute([$id]);
         $recipe = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if ($recipe) {
-            $stmt = $this->db->prepare("
-                SELECT s.step_text 
+            $stmt = $this->db->prepare("SELECT s.step_text 
                 FROM steps s 
                 INNER JOIN recipe_steps rs ON s.id = rs.step_id 
-                WHERE rs.recipe_id = ?
-            ");
+                WHERE rs.recipe_id = ?");
             $stmt->execute([$id]);
             $steps = $stmt->fetchAll(PDO::FETCH_COLUMN);
     
             $recipe['steps'] = $steps;
             return new Recipe($recipe);
         }
-        return null;
+
+        return null; // Si no se encuentra la receta, devuelve null
+
+    } catch (Exception $e) {
+        // Maneja el error y lanza una excepción o loguea el error
+        throw new Exception("Error al obtener la receta: " . $e->getMessage());
     }
+}
+
 
     // Obtener todas las recetas
     public function getAllRecipes() {
