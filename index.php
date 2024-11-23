@@ -21,11 +21,11 @@ error_reporting(E_ALL);
 $recipeManager = new RecipeManager();
 
 // Manejo de acciones desde la URL
-$action = $_GET['action'] ?? 'list';
+$action = $_GET['action'] ?? 'list';  // Por defecto, se listan las recetas
 
 switch ($action) {
     case 'create':
-        // Redirige al formulario de nueva receta
+        // Redirige al formulario para crear una nueva receta
         require 'views/task_form.php';
         break;
 
@@ -36,23 +36,24 @@ switch ($action) {
             $title = $_POST['recipe_name'];
             $description = $_POST['description'];
             $prepTime = $_POST['prep_time'];
+            $ingredients = $_POST['ingredient'];
             $steps = $_POST['steps']; // Pasos de la receta enviados desde el formulario
 
-            // Guarda la receta
-            $recipeId = $recipeManager->createRecipe($userId, $title, $description, $prepTime, $steps);
-
-            // Guarda los ingredientes asociados (si los hay)
+            // Guarda la receta en la base de datos
+            $recipeManager->createRecipe($userId, $title, $description, $prepTime, $ingredients, $steps);
+            // Guarda los ingredientes asociados a la receta (si los hay)
             $quantities = $_POST['quantity'];
             $units = $_POST['unit'];
             $ingredients = $_POST['ingredient'];
 
+            // Inserta cada ingrediente en la receta
             foreach ($ingredients as $index => $ingredientName) {
                 $quantity = $quantities[$index];
                 $unit = $units[$index];
                 $recipeManager->addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit);
             }
 
-            // Redirige al índice después de guardar
+            // Redirige al índice (lista de recetas) después de guardar
             header("Location: index.php");
             exit;
         }
@@ -63,6 +64,7 @@ switch ($action) {
         if (isset($_GET['id'])) {
             $recipeManager->deleteRecipe($_GET['id']);
         }
+        // Redirige al índice después de eliminar la receta
         header("Location: index.php");
         break;
 
@@ -73,9 +75,10 @@ switch ($action) {
             $recipe = $recipeManager->getRecipeById($recipe_id);
 
             if ($recipe) {
-                require 'views/edit_recipe.php';  // Muestra el formulario de edición
+                // Muestra el formulario de edición si la receta existe
+                require 'views/edit_recipe.php';
             } else {
-                // Si no existe la receta, redirige
+                // Si no existe la receta, redirige a la lista
                 header('Location: index.php');
                 exit();
             }
@@ -89,3 +92,4 @@ switch ($action) {
         break;
 }
 ?>
+

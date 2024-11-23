@@ -52,8 +52,6 @@ ob_start();
             <button type="button" id="remove-step" class="remove">Menos</button>
         </div>
 
-        <!-- Eliminé la sección de fotos para ajustarme a tu petición -->
-
         <label for="description">Descripción:</label>
         <textarea id="description" name="description" rows="3" placeholder="Ej. Receta especial para fiestas" required></textarea>
 
@@ -130,3 +128,4 @@ $content = ob_get_clean();
 // Incluimos el layout
 require 'layout.php';
 ?>
+

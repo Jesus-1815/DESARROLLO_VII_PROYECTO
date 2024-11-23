@@ -14,7 +14,12 @@ class Database {
                 DB_PASS
             );
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+            // Verificar si la conexión es exitosa
+            if ($this->connection) {
+            }
         } catch (PDOException $e) {
+            // Lanza una excepción si ocurre un error
             throw new Exception("Connection failed: " . $e->getMessage());
         }
     }
