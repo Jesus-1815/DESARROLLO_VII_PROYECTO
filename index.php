@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 require_once 'config.php';
 require_once 'src/Database.php';
 require_once 'src/RecipeManager.php';
-require_once 'src/Recipe.php';  // Asegúrate de incluir la clase Recipe
+require_once 'src/Recipe.php'; // Asegúrate de incluir la clase Recipe
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -21,7 +21,10 @@ error_reporting(E_ALL);
 $recipeManager = new RecipeManager();
 
 // Manejo de acciones desde la URL
-$action = $_GET['action'] ?? 'list';  // Por defecto, se listan las recetas
+$action = $_GET['action'] ?? 'list'; // Por defecto, se listan las recetas
+
+// Obtenemos el término de búsqueda si existe
+$searchQuery = $_GET['query'] ?? ''; // Obtiene el término de búsqueda desde la barra de búsqueda
 
 switch ($action) {
     case 'create':
@@ -29,45 +32,58 @@ switch ($action) {
         require 'views/task_form.php';
         break;
 
-        case 'store':
-            // Procesa el formulario para guardar una nueva receta
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $userId = $_SESSION['user_id']; // El ID del usuario en sesión
-                $title = $_POST['recipe_name'];
-                $description = $_POST['description'];
-                $prepTime = $_POST['prep_time'];
-                $ingredients = $_POST['ingredient'];
-                $steps = $_POST['steps']; // Pasos de la receta enviados desde el formulario
-        
-                $recipeId = $recipeManager->createRecipe($userId, $title, $description, $prepTime, $ingredients, $steps);
-                if (!$recipeId) {
-                 die("Error: No se pudo crear la receta.");
-                }
+    case 'store':
+        // Procesa el formulario para guardar una nueva receta
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $userId = $_SESSION['user_id']; // El ID del usuario en sesión
+            $title = $_POST['recipe_name'];
+            $description = $_POST['description'];
+            $prepTime = $_POST['prep_time'];
+            $ingredients = $_POST['ingredient'];
+            $steps = $_POST['steps']; // Pasos de la receta enviados desde el formulario
 
-                // Guarda los ingredientes asociados a la receta (si los hay)
-                $quantities = $_POST['quantity'];
-                $units = $_POST['unit'];
-        
-                // Inserta cada ingrediente en la receta
-                foreach ($ingredients as $index => $ingredientName) {
-                    $quantity = $quantities[$index];
-                    $unit = $units[$index];
-                    // Usa $recipeId obtenido al crear la receta
-                    $recipeManager->addIngredientToRecipe($recipeId, $ingredientName, $quantity);
-                    
-                }
-        
-                // Redirige al índice (lista de recetas) después de guardar
-                header("Location: index.php");
-                exit;
-               
+            // Crear la receta
+            $recipeId = $recipeManager->createRecipe($userId, $title, $description, $prepTime, $ingredients, $steps);
+            if (!$recipeId) {
+                die("Error: No se pudo crear la receta.");
             }
 
-            
-            
-            
-            break;
-        
+            // Guarda los ingredientes asociados a la receta (si los hay)
+            $quantities = $_POST['quantity'];
+            $units = $_POST['unit'];
+
+            // Inserta cada ingrediente en la receta
+            foreach ($ingredients as $index => $ingredientName) {
+                $quantity = $quantities[$index];
+                $unit = $units[$index];
+                // Usa $recipeId obtenido al crear la receta
+                $recipeManager->addIngredientToRecipe($recipeId, $ingredientName, $quantity);
+            }
+
+            // Manejo de imágenes
+            if (isset($_FILES['recipe_images']) && $_FILES['recipe_images']['error'][0] === 0) { // Verifica si se enviaron imágenes
+                $images = $_FILES['recipe_images'];
+                $uploadDir = 'uploads/recipes/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true); // Crea el directorio si no existe
+                }
+
+                for ($i = 0; $i < count($images['name']); $i++) {
+                    $imageName = uniqid() . '_' . basename($images['name'][$i]);
+                    $imagePath = $uploadDir . $imageName;
+
+                    if (move_uploaded_file($images['tmp_name'][$i], $imagePath)) {
+                        // Asocia la imagen con la receta en la base de datos
+                        $recipeManager->addImageToRecipe($recipeId, $imagePath);
+                    }
+                }
+            }
+
+            // Redirige al índice (lista de recetas) después de guardar
+            header("Location: index.php");
+            exit;
+        }
+        break;
 
     case 'delete':
         // Elimina una receta
@@ -96,10 +112,11 @@ switch ($action) {
         break;
 
     default:
-        // Muestra la lista de recetas
-        $recipes = $recipeManager->getAllRecipes();
+        // Muestra la lista de recetas con búsqueda si es necesario
+        $recipes = $recipeManager->getAllRecipes($searchQuery);  // Pasamos el término de búsqueda
         require 'views/task_list.php';
         break;
 }
+
 ?>
 

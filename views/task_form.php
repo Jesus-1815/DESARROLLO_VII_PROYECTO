@@ -13,7 +13,8 @@ ob_start();
     <form action="<?php echo BASE_URL; ?>/index.php?action=store" method="POST" enctype="multipart/form-data">
         <label for="recipe-name">Nombre de la receta:</label>
         <input type="text" id="recipe-name" name="recipe_name" placeholder="Ej. Pastel de chocolate" maxlength="100" required>
-
+        <label for="recipe_images">Subir imágenes:</label>
+        <input type="file" name="recipe_images[]" id="recipe_images" multiple>
         <label for="prep-time">Tiempo de preparación (en minutos):</label>
         <input type="number" id="prep-time" name="prep_time" min="1" max="500" required>
 
@@ -40,7 +41,6 @@ ob_start();
             <button type="button" id="add-ingredient">Más</button>
             <button type="button" id="remove-ingredient" class="remove">Menos</button>
         </div>
-
         <label for="steps">Pasos a seguir:</label>
         <div id="steps-container">
             <div class="step-row">

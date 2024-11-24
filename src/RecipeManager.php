@@ -79,17 +79,45 @@ class RecipeManager {
         throw new Exception("Error al obtener la receta: " . $e->getMessage());
     }
 }
-
-
-    // Obtener todas las recetas
-    public function getAllRecipes() {
+// Obtener todas las recetas o buscar recetas si se proporciona un término de búsqueda
+public function getAllRecipes($searchQuery = '') {
+    // Si hay un término de búsqueda, realizar la búsqueda
+    if ($searchQuery) {
+        // Preparamos la consulta SQL con los filtros por título, ingredientes y tiempo de preparación
+        $sql = "SELECT DISTINCT r.* 
+                FROM recipes r
+                LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+                LEFT JOIN ingredients i ON ri.ingredient_id = i.id
+                WHERE r.title LIKE :query
+                OR r.prep_time LIKE :query
+                OR i.name LIKE :query
+                ORDER BY r.created_at DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        
+        // Ejecutamos la consulta con el parámetro de búsqueda
+        $stmt->execute([':query' => "%$searchQuery%"]);
+    } else {
+        // Si no hay término de búsqueda, obtener todas las recetas
         $stmt = $this->db->query("SELECT * FROM recipes ORDER BY created_at DESC");
-        $recipes = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $recipes[] = new Recipe($row);
-        }
-        return $recipes;
     }
+
+    $recipes = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        // Creamos un objeto de tipo Recipe y asignamos los datos obtenidos
+        $recipe = new Recipe($row);
+        
+        // Asignamos la ruta de la imagen si está disponible en la base de datos
+        if (isset($row['image_path']) && !empty($row['image_path'])) {
+            $recipe->setImagePath($row['image_path']);  // Asignamos la imagen a la receta
+        }
+        
+        // Añadimos la receta al array de recetas
+        $recipes[] = $recipe;
+    }
+    
+    return $recipes;
+}
 
     // Actualizar receta
     public function updateRecipe($id, $title, $description, $prep_time, $steps) {
@@ -148,6 +176,22 @@ class RecipeManager {
         $stmt->execute([$recipe_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function addImageToRecipe($recipeId, $imagePath) {
+        try {
+            $stmt = $this->db->prepare("INSERT INTO recipe_images (recipe_id, image_path) VALUES (?, ?)");
+            $stmt->execute([$recipeId, $imagePath]);
+        } catch (Exception $e) {
+            throw new Exception("Error al guardar la imagen: " . $e->getMessage());
+        }
+    }
+    
+    public function getImagesByRecipeId($recipeId) {
+    $stmt = $this->db->prepare("SELECT image_path FROM recipe_images WHERE recipe_id = ?");
+    $stmt->execute([$recipeId]);
+    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
 
     // Eliminar receta
     public function deleteRecipe($id) {

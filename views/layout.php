@@ -17,13 +17,6 @@
         <?php endif; ?>
     </div>
 
-    <div class="header-center">
-        <form class="search-bar" method="get" action="/PROYECTO/buscar_recetas.php">
-            <input type="text" name="query" placeholder="Buscar recetas...">
-            <button type="submit">Buscar</button>
-        </form>
-    </div>
-
     <div class="header-right">
         <a href="logout.php" class="logout-btn">Cerrar sesión</a>
     </div>
