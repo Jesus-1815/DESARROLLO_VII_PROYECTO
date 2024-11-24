@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 // Function to read .env file
 function loadEnv($path) {
@@ -38,3 +38,6 @@ define('DB_PASS', getenv('DB_PASS'));
 
 // Derived constants
 define('PUBLIC_URL', BASE_URL . '/public');
+
+// Define DB_DSN based on DB_HOST and DB_NAME
+define('DB_DSN', 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8');

@@ -11,10 +11,17 @@
 
 <header>
     <div class="header-left">
-        <h2><?php $pageTitle = basename($_SERVER['PHP_SELF']) == 'index.php' ? 'Inicio' : 'Buscar Recetas'; echo $pageTitle; ?></h2>
+        <h2><?php 
+            $pageTitle = basename($_SERVER['PHP_SELF']) == 'index.php' ? 'Inicio' : 'Buscar Recetas'; 
+            echo $pageTitle; 
+        ?></h2>
         <?php if ($pageTitle !== 'Inicio'): ?>
-            <a href="index.php" class="home-link">Volver al Inicio</a>
+            <a href="index.php" class="home-link">Volver al Inicio</a>  <!-- Botón que redirige a la página principal -->
         <?php endif; ?>
+    </div>
+
+    <div class="header-center">
+        <a href="support.php" class="support-btn">Soporte</a> <!-- Botón que redirige al formulario de soporte -->
     </div>
 
     <div class="header-right">
@@ -23,12 +30,14 @@
     
 </header>
 </div>
-    <main>
-        <?php echo $content; ?>
-    </main>
-    <footer>
-        <p>&copy; 2024 Recetas App</p>
-    </footer>
-    <script src="<?php echo BASE_URL; ?>/public/assets/js/main.js"></script>
+<main>
+    <?php echo $content; ?>
+</main>
+<footer>
+    <p>&copy; 2024 Recetas App</p>
+</footer>
+<script src="<?php echo BASE_URL; ?>/public/assets/js/main.js"></script>
 </body>
 </html>
+
+
