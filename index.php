@@ -39,6 +39,8 @@ switch ($action) {
                 $description = $_POST['description'];
                 $prepTime = $_POST['prep_time'];
                 $ingredients = $_POST['ingredient'];
+                $quantities = $_POST['quantity'];
+                $units = $_POST['unit'];
                 $steps = $_POST['steps'];
         
                 // Crear la receta
@@ -46,10 +48,6 @@ switch ($action) {
                 if (!$recipeId) {
                     die("Error: No se pudo crear la receta.");
                 }
-        
-                // Guarda los ingredientes asociados a la receta (si los hay)
-                $quantities = $_POST['quantity'];
-                $units = $_POST['unit']; // Aquí es donde se obtiene la unidad de cada ingrediente
         
                 // Inserta cada ingrediente con su unidad
                 foreach ($ingredients as $index => $ingredientName) {

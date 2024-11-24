@@ -38,18 +38,30 @@ class RecipeManager {
     // Agregar ingrediente a la receta
     public function addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit = null) {
         try {
-            // Inserta el ingrediente en la receta con la unidad de medida
-            $stmt = $this->db->prepare("
-                INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
-                SELECT :recipe_id, id, :quantity, :unit
-                FROM ingredients WHERE name = :ingredient_name
-            ");
-            $stmt->bindParam(':recipe_id', $recipeId);  // Asegúrate de pasar el `recipe_id`
-            $stmt->bindParam(':ingredient_name', $ingredientName);
-            $stmt->bindParam(':quantity', $quantity);
-            $stmt->bindParam(':unit', $unit);
-    
-            return $stmt->execute();
+           // Verificar si el ingrediente existe
+$stmt = $this->db->prepare("SELECT id FROM ingredients WHERE name = :ingredient_name");
+$stmt->bindParam(':ingredient_name', $ingredientName);
+$stmt->execute();
+$ingredientId = $stmt->fetchColumn();
+
+// Si no existe, insertarlo
+if (!$ingredientId) {
+    $stmt = $this->db->prepare("INSERT INTO ingredients (name) VALUES (:ingredient_name)");
+    $stmt->bindParam(':ingredient_name', $ingredientName);
+    $stmt->execute();
+    $ingredientId = $this->db->lastInsertId(); // Obtén el ID del ingrediente insertado
+}
+
+// Ahora puedes insertar el ingrediente en recipe_ingredients
+$stmt = $this->db->prepare("INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
+    VALUES (:recipe_id, :ingredient_id, :quantity, :unit)");
+$stmt->bindParam(':recipe_id', $recipeId);
+$stmt->bindParam(':ingredient_id', $ingredientId);
+$stmt->bindParam(':quantity', $quantity);
+$stmt->bindParam(':unit', $unit);
+
+return $stmt->execute();
+
         } catch (Exception $e) {
             throw new Exception("Error adding ingredient to recipe: " . $e->getMessage());
         }
