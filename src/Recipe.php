@@ -10,6 +10,7 @@ class Recipe {
     private $steps;
     public $ingredients = [];
     private $created_at;
+    private $imagePath;
 
     public function __construct(array $data) {
         $this->name = $data['name'] ?? null; // Asigna 'name' desde $data
@@ -23,6 +24,7 @@ class Recipe {
         $this->prep_time = $data['prep_time'] ?? null;
         $this->steps = $data['steps'] ?? null;
         $this->created_at = $data['created_at'] ?? null;
+        $this->imagePath = isset($data['image_path']) ? $data['image_path'] : null;
     }
 
     // Métodos Getter
@@ -56,6 +58,14 @@ class Recipe {
 
     public function getCreatedAt() {
         return $this->created_at;
+    }
+    
+    public function getImagePath() {
+        return $this->imagePath;
+    }
+
+    public function setImagePath($imagePath) {
+        $this->imagePath = $imagePath;
     }
 }
 ?>

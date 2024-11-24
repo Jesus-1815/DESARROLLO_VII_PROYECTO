@@ -5,5 +5,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     description TEXT,
     prep_time TIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    image_path VARCHAR(255) NULL,  -- Agregamos la columna image_path
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
