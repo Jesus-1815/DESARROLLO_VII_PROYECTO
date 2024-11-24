@@ -1,5 +1,5 @@
 <?php
-
+//p
 class MigrationManager {
     private $pdo;
     private $migrationsPath;
