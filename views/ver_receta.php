@@ -204,6 +204,20 @@ ob_start();
     }
     }
 
+    <?php
+// Asegúrate de que $steps sea un array antes de intentar acceder a sus elementos
+$steps = $recipeManager->getStepsByRecipeId($recipeId);
+
+if (is_array($steps)) {
+    foreach ($steps as $step) {
+        echo "<p>{$step['step_text']}</p>"; // Accede a step_text si es un array
+    }
+} else {
+    echo "No hay pasos disponibles para esta receta.";
+}
+?>
+
+
     </script>
     <!-- Modal para agregar comentario -->
     <div id="commentModal" class="modal" style="display:none;">

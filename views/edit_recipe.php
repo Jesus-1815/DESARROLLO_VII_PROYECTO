@@ -5,9 +5,9 @@ if (!isset($recipe)) {
     exit;
 }
 
-// Obtén los ingredientes asociados a la receta
+// Obtén los ingredientes y pasos asociados a la receta
 $ingredients = $recipeManager->getIngredientsByRecipeId($recipe->getId());
-$steps = $recipe->getSteps();
+$steps = $recipe->getSteps();  // Asegúrate de que esto devuelva un array de pasos
 ?>
 
 <h2>Editar Receta: <?php echo htmlspecialchars($recipe->getTitle()); ?></h2>
@@ -41,15 +41,15 @@ $steps = $recipe->getSteps();
                 <input type="text" name="ingredient[]" value="<?php echo htmlspecialchars($ingredient['name']); ?>" placeholder="Ingrediente" required>
                 <input type="number" name="quantity[]" value="<?php echo htmlspecialchars($ingredient['quantity']); ?>" placeholder="Cantidad" required>
                 <select name="unit[]" required>
-                    <option value="tazas">Tazas</option>
-                    <option value="oz">Onzas</option>
-                    <option value="lb">Libras</option>
-                    <option value="ml">Mililitros</option>
-                    <option value="l">Litros</option>
-                    <option value="gr">Gramos</option>
-                    <option value="kg">Kilogramos</option>
-                    <option value="Cda">Cucharadas</option>
-                    <option value="cdta">Cucharaditas</option>
+                    <option value="tazas" <?php echo ($ingredient['unit'] == 'tazas') ? 'selected' : ''; ?>>Tazas</option>
+                    <option value="oz" <?php echo ($ingredient['unit'] == 'oz') ? 'selected' : ''; ?>>Onzas</option>
+                    <option value="lb" <?php echo ($ingredient['unit'] == 'lb') ? 'selected' : ''; ?>>Libras</option>
+                    <option value="ml" <?php echo ($ingredient['unit'] == 'ml') ? 'selected' : ''; ?>>Mililitros</option>
+                    <option value="l" <?php echo ($ingredient['unit'] == 'l') ? 'selected' : ''; ?>>Litros</option>
+                    <option value="gr" <?php echo ($ingredient['unit'] == 'gr') ? 'selected' : ''; ?>>Gramos</option>
+                    <option value="kg" <?php echo ($ingredient['unit'] == 'kg') ? 'selected' : ''; ?>>Kilogramos</option>
+                    <option value="Cda" <?php echo ($ingredient['unit'] == 'Cda') ? 'selected' : ''; ?>>Cucharadas</option>
+                    <option value="cdta" <?php echo ($ingredient['unit'] == 'cdta') ? 'selected' : ''; ?>>Cucharaditas</option>
                 </select>
                 <button type="button" class="remove-ingredient">Eliminar</button>
             </div>
@@ -60,7 +60,7 @@ $steps = $recipe->getSteps();
     <!-- Pasos -->
     <h3>Pasos:</h3>
     <div id="steps-container">
-        <?php foreach ($steps as $step): ?>
+        <?php foreach ($steps as $index => $step): ?>
             <div class="step-item">
                 <textarea name="steps[]" required><?php echo htmlspecialchars($step); ?></textarea>
                 <button type="button" class="remove-step">Eliminar</button>
@@ -128,89 +128,3 @@ document.getElementById('steps-container').addEventListener('click', function(ev
     }
 });
 </script>
-
-<!-- Agregar un CSS interno para mejorar el diseño -->
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        padding: 20px;
-    }
-
-    .recipe-form {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        max-width: 800px;
-        margin: auto;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 8px;
-    }
-
-    .form-group input, .form-group textarea, .form-group select {
-        width: 100%;
-        padding: 8px;
-        margin: 5px 0;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    .ingredient-item, .step-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-
-    .ingredient-item input, .step-item textarea {
-        margin-right: 10px;
-    }
-
-    .ingredient-item button, .step-item button {
-        margin-left: 10px;
-        background-color: #f44336;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-    }
-
-    .ingredient-item button:hover, .step-item button:hover {
-        background-color: #d32f2f;
-    }
-
-    #add-ingredient, #add-step {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-        border-radius: 4px;
-    }
-
-    #add-ingredient:hover, #add-step:hover {
-        background-color: #45a049;
-    }
-
-    .submit-btn {
-        background-color: #2196F3;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-    }
-
-    .submit-btn:hover {
-        background-color: #0b7dda;
-    }
-</style>

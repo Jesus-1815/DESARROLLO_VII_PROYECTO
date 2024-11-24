@@ -12,22 +12,26 @@ class RecipeManager {
         $this->stepManager = new StepManager();
     }
 
-    // Crear o actualizar receta
+    // Crear receta
     public function createRecipe($userId, $title, $description, $prepTime, $ingredients, $steps) {
         try {
             $horas = floor($prepTime / 60);
             $minutosRestantes = $prepTime % 60;
-            
-            $prepTime= sprintf('%02d:%02d:00', $horas, $minutosRestantes);
+            $prepTime = sprintf('%02d:%02d:00', $horas, $minutosRestantes);
+
             $query = "INSERT INTO recipes (user_id, title, description, prep_time) VALUES (?, ?, ?, ?)";
             $stmt = $this->db->prepare($query);
             $stmt->execute([$userId, $title, $description, $prepTime]);
-    
+
             // Obtener el ID de la receta recién creada
             $recipeId = $this->db->lastInsertId();
-    
-            // Aquí puedes insertar ingredientes y pasos si es necesario
-            return $recipeId; // ¡Devuelve el ID de la receta!
+
+            // Agregar pasos
+            foreach ($steps as $stepOrder => $stepText) {
+                $this->stepManager->createStep($recipeId, $stepOrder + 1, $stepText);
+            }
+
+            return $recipeId;
         } catch (Exception $e) {
             throw new Exception("Error creating recipe: " . $e->getMessage());
         }
@@ -39,28 +43,28 @@ class RecipeManager {
     public function addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit = null) {
         try {
            // Verificar si el ingrediente existe
-$stmt = $this->db->prepare("SELECT id FROM ingredients WHERE name = :ingredient_name");
-$stmt->bindParam(':ingredient_name', $ingredientName);
-$stmt->execute();
-$ingredientId = $stmt->fetchColumn();
+            $stmt = $this->db->prepare("SELECT id FROM ingredients WHERE name = :ingredient_name");
+            $stmt->bindParam(':ingredient_name', $ingredientName);
+            $stmt->execute();
+            $ingredientId = $stmt->fetchColumn();
 
-// Si no existe, insertarlo
-if (!$ingredientId) {
-    $stmt = $this->db->prepare("INSERT INTO ingredients (name) VALUES (:ingredient_name)");
-    $stmt->bindParam(':ingredient_name', $ingredientName);
-    $stmt->execute();
-    $ingredientId = $this->db->lastInsertId(); // Obtén el ID del ingrediente insertado
-}
+        // Si no existe, insertarlo
+        if (!$ingredientId) {
+            $stmt = $this->db->prepare("INSERT INTO ingredients (name) VALUES (:ingredient_name)");
+            $stmt->bindParam(':ingredient_name', $ingredientName);
+            $stmt->execute();
+            $ingredientId = $this->db->lastInsertId(); // Obtén el ID del ingrediente insertado
+        }
 
-// Ahora puedes insertar el ingrediente en recipe_ingredients
-$stmt = $this->db->prepare("INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
-    VALUES (:recipe_id, :ingredient_id, :quantity, :unit)");
-$stmt->bindParam(':recipe_id', $recipeId);
-$stmt->bindParam(':ingredient_id', $ingredientId);
-$stmt->bindParam(':quantity', $quantity);
-$stmt->bindParam(':unit', $unit);
+        // Ahora puedes insertar el ingrediente en recipe_ingredients
+        $stmt = $this->db->prepare("INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
+        VALUES (:recipe_id, :ingredient_id, :quantity, :unit)");
+        $stmt->bindParam(':recipe_id', $recipeId);
+        $stmt->bindParam(':ingredient_id', $ingredientId);
+        $stmt->bindParam(':quantity', $quantity);
+        $stmt->bindParam(':unit', $unit);
 
-return $stmt->execute();
+    return $stmt->execute();
 
         } catch (Exception $e) {
             throw new Exception("Error adding ingredient to recipe: " . $e->getMessage());
@@ -137,11 +141,7 @@ public function getAllRecipes($searchQuery = '') {
     public function updateRecipe($recipeId, $title, $description, $prepTime, $ingredients, $steps) {
         try {
             // Actualiza la información básica de la receta
-            $stmt = $this->db->prepare("
-                UPDATE recipes 
-                SET title = ?, description = ?, prep_time = ?
-                WHERE id = ?
-            ");
+            $stmt = $this->db->prepare("UPDATE recipes SET title = ?, description = ?, prep_time = ? WHERE id = ?");
             $stmt->execute([$title, $description, $prepTime, $recipeId]);
     
             // Elimina ingredientes antiguos
@@ -152,29 +152,47 @@ public function getAllRecipes($searchQuery = '') {
             foreach ($ingredients as $ingredient) {
                 $stmt = $this->db->prepare("
                     INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
-                    SELECT ?, id, ?, ?
+                    SELECT ?, id, ?, ? 
                     FROM ingredients WHERE name = ?
                 ");
                 $stmt->execute([$recipeId, $ingredient['quantity'], $ingredient['unit'], $ingredient['name']]);
             }
     
             // Elimina los pasos antiguos
-            $stmt = $this->db->prepare("DELETE FROM recipe_steps WHERE recipe_id = ?");
+            $stmt = $this->db->prepare("DELETE FROM steps WHERE recipe_id = ?");
             $stmt->execute([$recipeId]);
     
             // Inserta los nuevos pasos
-            foreach ($steps as $index => $step) {
+            foreach ($steps as $index => $stepText) {
                 $stmt = $this->db->prepare("
-                    INSERT INTO recipe_steps (recipe_id, step_order, step_text) 
+                    INSERT INTO steps (recipe_id, step_number, step_text) 
                     VALUES (?, ?, ?)
                 ");
-                $stmt->execute([$recipeId, $index + 1, $step]);
+                $stmt->execute([$recipeId, $index + 1, $stepText]);  // Usamos step_number en lugar de step_order
             }
     
             return true;
+    
         } catch (Exception $e) {
             throw new Exception("Error updating recipe: " . $e->getMessage());
         }
+    }
+    
+    
+    
+    
+    
+    public function getStepsByRecipeId($recipeId) {
+        $stmt = $this->db->prepare("
+            SELECT id, step_text, step_number 
+            FROM steps 
+            WHERE recipe_id = ? 
+            ORDER BY step_number ASC
+        ");
+        $stmt->execute([$recipeId]);
+        
+        // Devolver siempre un array, aunque esté vacío
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
     
