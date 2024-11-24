@@ -10,7 +10,7 @@ $ingredients = $recipeManager->getIngredientsByRecipeId($recipe->getId());
 $steps = $recipe->getSteps();  // Asegúrate de que esto devuelva un array de pasos
 ?>
 
-<h2>Editar Receta: <?php echo htmlspecialchars($recipe->getTitle()); ?></h2>
+<h2 class="h2">Editar Receta: <?php echo htmlspecialchars($recipe->getTitle()); ?></h2>
 
 <form action="index.php?action=update" method="POST" enctype="multipart/form-data" class="recipe-form">
     <input type="hidden" name="recipe_id" value="<?php echo htmlspecialchars($recipe->getId()); ?>">
@@ -128,3 +128,89 @@ document.getElementById('steps-container').addEventListener('click', function(ev
     }
 });
 </script>
+
+<!-- Agregar un CSS interno para mejorar el diseño -->
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+    }
+
+    .recipe-form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin: auto;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .ingredient-item, .step-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .ingredient-item input, .step-item textarea {
+        margin-right: 10px;
+    }
+
+    .ingredient-item button, .step-item button {
+        margin-left: 10px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .ingredient-item button:hover, .step-item button:hover {
+        background-color: #d32f2f;
+    }
+
+    #add-ingredient, #add-step {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    #add-ingredient:hover, #add-step:hover {
+        background-color: #45a049;
+    }
+
+    .submit-btn {
+        background-color: #2196F3;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .submit-btn:hover {
+        background-color: #0b7dda;
+    }
+</style>

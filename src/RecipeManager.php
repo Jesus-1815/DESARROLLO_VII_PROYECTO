@@ -241,6 +241,56 @@ public function getAllRecipes($searchQuery = '') {
             throw new Exception("Error clearing recipe ingredients: " . $e->getMessage());
         }
     }
+
+    public function rateRecipe($userId, $recipeId, $rating) {  
+        try {  
+            // Verificar si la receta existe  
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM recipes WHERE id = ?");  
+            $stmt->execute([$recipeId]);  
+            if (!$stmt->fetchColumn()) {  
+                throw new Exception("La receta con ID $recipeId no existe.");  
+            }  
+    
+            // Verificar si el usuario existe  
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE id = ?");  
+            $stmt->execute([$userId]);  
+            if (!$stmt->fetchColumn()) {  
+                throw new Exception("El usuario con ID $userId no existe.");  
+            }  
+    
+            // Verificar si ya existe una calificación  
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM ratings WHERE user_id = ? AND recipe_id = ?");  
+            $stmt->execute([$userId, $recipeId]);  
+            if ($stmt->fetchColumn()) {  
+                throw new Exception("El usuario ha calificado ya esta receta.");  
+            }  
+    
+            $sql = "INSERT INTO ratings (user_id, recipe_id, rating) VALUES (:user_id, :recipe_id, :rating)";  
+            $stmt = $this->db->prepare($sql);   
+    
+            $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);  
+            $stmt->bindValue(':recipe_id', $recipeId, PDO::PARAM_INT);  
+            $stmt->bindValue(':rating', $rating, PDO::PARAM_INT);  
+    
+            if ($stmt->execute()) {  
+                return true;  
+            } else {  
+                return false;  
+            }  
+        } catch (Exception $e) {  
+            throw new Exception("Error rating recipe: " . $e->getMessage());  
+        }  
+    }
+
+    public function addComment($recipeId, $userId, $comment) {  
+        try {  
+            $stmt = $this->db->prepare("INSERT INTO comments (recipe_id, user_id, comment) VALUES (?, ?, ?)");  
+            $stmt->execute([$recipeId, $userId, $comment]);  
+            return true;  
+        } catch (Exception $e) {  
+            throw new Exception("Error al agregar comentario: " . $e->getMessage());  
+        }  
+    }
     
 }
 ?>

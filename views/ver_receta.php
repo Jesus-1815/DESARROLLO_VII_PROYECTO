@@ -1,200 +1,483 @@
 <?php
 // Iniciamos el buffer de salida
 ob_start();
-?>
+if (isset($_SESSION['user_id'])): ?>  
+    <button onclick="mostrarFormularioComentario()">Agregar comentario</button>  
+    <button onclick="mostrarRating()">Calificar receta</button>  
+<?php else: ?>  
+    <p>Debes estar logueado para calificar o comentar.</p>  
+<?php endif; ?>
+
 <div class="recipe-container">
     <style>
-        /* Contenedor general */
+      /* Variables para colores */
+:root {
+  --primary-green: #2ecc71;
+  --dark-green: #27ae60;
+  --light-green: #a8e6cf;
+  --background-green: #f0f9f4;
+  --text-dark: #2c3e50;
+  --shadow: rgba(46, 204, 113, 0.2);
+}
+
+/* Estilos generales y reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-green);
+  color: var(--text-dark);
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* Header principal */
+.header {
+  background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 255, 255, 0.05) 10px,
+    rgba(255, 255, 255, 0.05) 20px
+  );
+  animation: backgroundMove 20s linear infinite;
+}
+
+@keyframes backgroundMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50%, 50%); }
+}
+
+/* Contenedor principal */
 .recipe-container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
-    background-color: #fff;
+  max-width: 1000px;
+  margin: 0 auto 3rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px var(--shadow);
+  position: relative;
 }
 
-/* Encabezado */
-.recipe-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
+/* Título y encabezado */
 .recipe-title {
-    font-size: 28px;
-    margin: 0;
-    color: #333;
+  font-size: 2.8rem;
+  color: var(--text-dark);
+  margin: 1rem 0;
+  padding-bottom: 1rem;
+  position: relative;
+  display: inline-block;
 }
 
+.recipe-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: var(--primary-green);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.recipe-title:hover::after {
+  width: 150px;
+}
+
+/* Sistema de rating con animación */
 .rating {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
 }
 
 .star {
-    color: gold;
-    font-size: 20px;
-    margin-right: 2px;
+  color: #ffd700;
+  font-size: 1.8rem;
+  animation: starPulse 2s infinite;
 }
 
-.star.empty {
-    color: #ddd;
-}
-
-.rating-average {
-    margin-left: 10px;
-    font-size: 16px;
-    color: #666;
+@keyframes starPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 .prep-time {
-    font-size: 16px;
-    color: #555;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--background-green);
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 500;
+  margin: 1rem 0;
 }
 
-/* Imagen y descripción */
-.recipe-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
+/* Imagen de la receta */
+.recipe-img {
+  width: 100%;
+  max-width: 700px;
+  margin: 2rem auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px var(--shadow);
 }
 
-.recipe-im img {
-    max-width: 100%;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.recipe-img img {
+  width: 100%;
+  height: auto;
+  transition: transform 0.5s;
 }
 
-.recipe-description {
-    font-size: 16px;
-    color: #444;
-    text-align: justify;
+.recipe-img:hover img {
+  transform: scale(1.05);
 }
 
-/* Pasos */
-.recipe-steps {
-    margin-top: 20px;
+/* Secciones de contenido */
+.recipe-section {
+  margin: 3rem 0;
+  padding: 2rem;
+  background: var(--background-green);
+  border-radius: 15px;
+  transition: transform 0.3s;
 }
 
-.recipe-steps h2 {
-    font-size: 22px;
-    margin-bottom: 10px;
-    color: #333;
+.recipe-section:hover {
+  transform: translateY(-5px);
 }
 
-.recipe-steps ol {
-    padding-left: 20px;
-    color: #555;
+h2 {
+  color: var(--dark-green);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  position: relative;
 }
 
-.recipe-steps li {
-    margin-bottom: 10px;
-    line-height: 1.5;
+h2::before {
+  content: '🌿';
+  margin-right: 10px;
+}
+
+/* Listas de ingredientes y pasos */
+ol, ul {
+  list-style-position: inside;
+  padding: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+li {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px var(--shadow);
+  transition: transform 0.2s;
+}
+
+li:hover {
+  transform: translateX(10px);
+}
+
+/* Botones de acción */
+.action-buttons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 1rem;
+}
+
+button, .btn {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+button:before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+}
+
+button[onclick*="mostrarFormularioComentario"]:before {
+  content: "💬";
+}
+
+button[onclick*="mostrarRating"]:before {
+  content: "⭐";
+}
+
+button:hover, .btn:hover {
+  background: var(--dark-green);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 20px var(--shadow);
+}
+
+button:active, .btn:active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* Modal mejorado */
+.modal {
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  margin: 10vh auto;
+  position: relative;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.close {
+  position: absolute;
+  right: 1.5rem;
+  top: 1rem;
+  font-size: 2rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.close:hover {
+  transform: rotate(90deg);
+}
+
+/* Formulario dentro del modal */
+textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--light-green);
+  border-radius: 15px;
+  font-size: 1rem;
+  margin: 1rem 0;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 10px var(--shadow);
 }
 
 /* Comentarios */
 .recipe-comments {
-    margin-top: 20px;
-}
-
-.recipe-comments h2 {
-    font-size: 22px;
-    margin-bottom: 10px;
-    color: #333;
+  margin-top: 3rem;
 }
 
 .comment {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    background-color: #f9f9f9;
+  background: var(--background-green);
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin: 1rem auto;
+  max-width: 700px;
+  text-align: left;
+  position: relative;
+  transition: transform 0.3s;
 }
 
-.comment p {
-    margin: 0;
-    font-size: 14px;
-    color: #555;
+.comment:hover {
+  transform: translateX(10px);
 }
 
+.comment strong {
+  color: var(--dark-green);
+}
+
+/* Animación de carga */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.loading {
+  background: linear-gradient(
+    90deg,
+    var(--background-green) 0%,
+    var(--light-green) 50%,
+    var(--background-green) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Mensajes de estado */
+.status-message {
+  padding: 1rem;
+  border-radius: 10px;
+  margin: 1rem 0;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .recipe-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  .recipe-title {
+    font-size: 2rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    padding: 0 1rem;
+  }
+
+  button, .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 5vh auto;
+  }
+}
     </style>
-    <?php if (!$recipe): ?>
-        <p>Recipe not found.</p>
-    <?php else: ?>
-    <div class="recipe-header">
-        <h1 class="recipe-title"><?php echo htmlspecialchars($recipe->getTitle()); ?></h1>
-        <div class="rating">
-            <span class="star">&#9733;</span>
-            <span class="rating-average">(4.0)</span>
-        </div>
-        <p class="prep-time">⏲️ <?php echo htmlspecialchars($recipe->getPrepTime()); ?></p>
-    </div>
+    <?php if (!$recipe): ?>  
+    <p>Recipe not found.</p>  
+<?php else: ?>  
+    <div class="recipe-header">  
+        <h1 class="recipe-title"><?php echo htmlspecialchars($recipe->getTitle()); ?></h1>  
+        <div class="rating">  
+            <span class="star">&#9733;</span>  
+<span class="rating-average">(<?php echo htmlspecialchars($recipe->getAverageRating()); ?>)</span>  
+<span class="rating-average">(Calificación no disponible)</span>
+        </div>  
+        <p class="prep-time">⏲️ <?php echo htmlspecialchars($recipe->getPrepTime()); ?></p>  
+    </div>  
 
-    <div class="recipe-body">
-        <div class="recipe-im">
-            <img src="<?php echo htmlspecialchars($imagen); ?>" alt="Imagen de la receta">
-        </div>
-        <p class="recipe-description"><?php echo htmlspecialchars($recipe->getDescription()); ?></p>
-    </div>
+    <div class="recipe-body">  
+        <div class="recipe-img">  
+            <img src="<?php echo htmlspecialchars($imagen); ?>" alt="Imagen de la receta">  
+        </div>  
+        <p class="recipe-description"><?php echo htmlspecialchars($recipe->getDescription()); ?></p>  
+    </div>  
 
-    <h2>Ingredientes</h2>
-    <ol>
-    <?php foreach ($ingredientes as $ingredient): ?>
-        <li>
-            <?php 
-                echo htmlspecialchars($ingredient['quantity']) . ' ';
-                echo htmlspecialchars($ingredient['unit']) . ' ';
-                echo htmlspecialchars($ingredient['name']);
-            ?>
-        </li>
-    <?php endforeach; ?>
-</ol>
+    <h2>Ingredientes</h2>  
+    <ol>  
+        <?php foreach ($ingredientes as $ingredient): ?>  
+            <li>  
+                <?php   
+                    echo htmlspecialchars($ingredient['quantity']) . ' ';  
+                    echo htmlspecialchars($ingredient['unit']) . ' ';  
+                    echo htmlspecialchars($ingredient['name']);  
+                ?>  
+            </li>  
+        <?php endforeach; ?>  
+    </ol>  
 
-    <h2>Pasos</h2>
-        <ol>
-            <?php foreach ($steps as $step): ?>
-                <li><?php echo htmlspecialchars($step['step_text']); ?></li>
-            <?php endforeach; ?>
-        </ol>
+    <h2>Pasos</h2>  
+    <ol>  
+        <?php foreach ($steps as $step): ?>  
+            <li><?php echo htmlspecialchars($step['step_text']); ?></li>  
+        <?php endforeach; ?>  
+    </ol>  
 
-    <div class="recipe-comments">
-        <h2>Comentarios</h2>
-        <?php if (!empty($comments)): ?>
-            <?php foreach ($comments as $comment): ?>
-                <div class="comment">
-                    <p><strong><?php echo htmlspecialchars($comment['username']); ?>:</strong> <?php echo htmlspecialchars($comment['comment_text']); ?></p>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p>No hay comentarios aún.</p>
-        <?php endif; ?>
-    </div>
-    <?php
-    
-    if ($_SESSION['user_id'] == $recipe->getUserId()): ?>
-        <!-- Botones para el creador de la receta -->
-        <a href="index.php?action=edit&id=<?= $recipe->getId() ?>" class="btn">Editar</a>
-        <a href="index.php?action=delete&id=<?= $recipe->getId() ?>" class="btn" onclick="return confirm('¿Eliminar esta receta?')">Eliminar</a>
-    <?php else: ?>
-        <!-- Botones para los usuarios que no son creadores -->
-        <button onclick="mostrarFormularioComentario()">Agregar comentario</button>
-        <button onclick="mostrarRating()">Calificar receta</button>
-    <?php endif; ?>
-    <script>
-        function mostrarFormularioComentario() {
-    // Mostrar el modal con el formulario
-    let modal = document.getElementById('commentModal');
-    modal.style.display = 'block';
-    }
+    <div class="recipe-comments">  
+        <h2>Comentarios</h2>  
+        <?php if (!empty($comments)): ?>  
+            <?php foreach ($comments as $comment): ?>  
+                <div class="comment">  
+                    <p><strong><?php echo htmlspecialchars($comment['username']); ?>:</strong> <?php echo htmlspecialchars($comment['comment_text']); ?></p>  
+                </div>  
+            <?php endforeach; ?>  
+        <?php else: ?>  
+            <p>No hay comentarios aún.</p>  
+        <?php endif; ?>  
+    </div>  
 
-    function mostrarRating() {
-    // Mostrar el sistema de calificación
-    let rating = prompt("Califica la receta de 1 a 5 estrellas:");
+    <?php if (isset($_SESSION['user_id'])): ?>  
+        <?php if ($_SESSION['user_id'] == $recipe->getUserId()): ?>  
+            <!-- Botones para el creador de la receta -->  
+            <a href="index.php?action=edit&id=<?= $recipe->getId() ?>" class="btn">Editar</a>  
+            <a href="index.php?action=delete&id=<?= $recipe->getId() ?>" class="btn" onclick="return confirm('¿Eliminar esta receta?')">Eliminar</a>  
+        <?php else: ?>  
+            <!-- Botones para los usuarios que no son creadores -->  
+            <button onclick="mostrarFormularioComentario()">Agregar comentario</button>  
+            <button onclick="mostrarRating()">Calificar receta</button>  
+        <?php endif; ?>  
+    <?php else: ?>  
+        <p>Debes estar logueado para calificar o comentar.</p>  
+    <?php endif; ?>  
+
+    <script>  
+        function mostrarFormularioComentario() {  
+            // Mostrar el modal con el formulario  
+            let modal = document.getElementById('commentModal');  
+            modal.style.display = 'block';  
+        }  
+
+        function mostrarRating() {  
+            // Mostrar el sistema de calificación  
+            let rating = prompt("Califica la receta de 1 a 5 estrellas:");  
 
     if (rating >= 1 && rating <= 5) {
         // Redirigir al index.php con la acción rate y el rating
@@ -203,20 +486,6 @@ ob_start();
         alert("Por favor, ingresa un número válido entre 1 y 5.");
     }
     }
-
-    <?php
-// Asegúrate de que $steps sea un array antes de intentar acceder a sus elementos
-$steps = $recipeManager->getStepsByRecipeId($recipeId);
-
-if (is_array($steps)) {
-    foreach ($steps as $step) {
-        echo "<p>{$step['step_text']}</p>"; // Accede a step_text si es un array
-    }
-} else {
-    echo "No hay pasos disponibles para esta receta.";
-}
-?>
-
 
     </script>
     <!-- Modal para agregar comentario -->
@@ -233,7 +502,6 @@ if (is_array($steps)) {
         </div>
     </div>
 
-    <?php endif; 
-    $content = ob_get_clean();
-    require 'layout.php';?>
-</div>
+<?php endif;   
+$content = ob_get_clean();  
+require 'layout.php'; ?>
