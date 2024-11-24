@@ -15,6 +15,10 @@ class RecipeManager {
     // Crear o actualizar receta
     public function createRecipe($userId, $title, $description, $prepTime, $ingredients, $steps) {
         try {
+            $horas = floor($prepTime / 60);
+            $minutosRestantes = $prepTime % 60;
+            
+            $prepTime= sprintf('%02d:%02d:00', $horas, $minutosRestantes);
             $query = "INSERT INTO recipes (user_id, title, description, prep_time) VALUES (?, ?, ?, ?)";
             $stmt = $this->db->prepare($query);
             $stmt->execute([$userId, $title, $description, $prepTime]);
@@ -166,7 +170,7 @@ public function getAllRecipes($searchQuery = '') {
     // Obtener ingredientes por receta
     public function getIngredientsByRecipeId($recipe_id) {
         $stmt = $this->db->prepare("
-            SELECT i.name, ri.quantity 
+            SELECT i.name, ri.quantity, ri.unit
             FROM ingredients i
             JOIN recipe_ingredients ri ON i.id = ri.ingredient_id
             WHERE ri.recipe_id = ?

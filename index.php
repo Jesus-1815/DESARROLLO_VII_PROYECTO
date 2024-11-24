@@ -84,7 +84,7 @@ switch ($action) {
             break;
         
 
-    case 'delete':
+        case 'delete':
         // Elimina una receta
         if (isset($_GET['id'])) {
             $recipeManager->deleteRecipe($_GET['id']);
@@ -93,7 +93,7 @@ switch ($action) {
         header("Location: index.php");
         break;
 
-    case 'edit':
+        case 'edit':
         // Redirige al formulario de edición de receta
         if (isset($_GET['id'])) {
             $recipe_id = $_GET['id'];
@@ -124,18 +124,18 @@ switch ($action) {
                  $quantities = $_POST['quantity'] ?? [];
                  $units = $_POST['unit'] ?? [];
 
-// Combina los ingredientes con las cantidades y unidades
-$ingredientData = [];
-foreach ($ingredients as $index => $ingredientName) {
-    $ingredientData[] = [
-        'name' => $ingredientName,
-        'quantity' => $quantities[$index] ?? 0,
-        'unit' => $units[$index] ?? ''
-    ];
-}
+                // Combina los ingredientes con las cantidades y unidades
+                $ingredientData = [];
+                foreach ($ingredients as $index => $ingredientName) {
+                    $ingredientData[] = [
+                        'name' => $ingredientName,
+                        'quantity' => $quantities[$index] ?? 0,
+                        'unit' => $units[$index] ?? ''
+                    ];
+                }
 
-// Ahora llama a updateRecipe con todos los parámetros
-$recipeUpdated = $recipeManager->updateRecipe($recipeId, $title, $description, $prepTime, $ingredientData, $steps);
+                // Ahora llama a updateRecipe con todos los parámetros
+                $recipeUpdated = $recipeManager->updateRecipe($recipeId, $title, $description, $prepTime, $ingredientData, $steps);
 
         
                 if (!$recipeUpdated) {
@@ -180,17 +180,43 @@ $recipeUpdated = $recipeManager->updateRecipe($recipeId, $title, $description, $
             }
             break;
              
-            case 'view':
-                // ver una receta
-                if (isset($_GET['id'])) {
-                    $recipe= $recipeManager->getRecipeById($_GET['id']);
-                    $imagen = $recipeManager ->getImagesByRecipeId($_GET['id']);
-                    $ingredientes= $recipeManager->getIngredientsByRecipeId($_GET['id']);
-                    $imagen = $imagen[0] ?? null;
-                    
-                    require 'views/ver_receta.php';
+        case 'view':
+            // ver una receta
+            if (isset($_GET['id'])) {
+                $recipe= $recipeManager->getRecipeById($_GET['id']);
+                $imagen = $recipeManager ->getImagesByRecipeId($_GET['id']);
+                $ingredientes= $recipeManager->getIngredientsByRecipeId($_GET['id']);
+                $imagen = $imagen[0] ?? null;
+                
+                require 'views/ver_receta.php';
+            }
+            break;
+
+           /* case 'rate':
+                try {
+                    if (isset($_GET['id'])) {
+                        $recipeManager -> addRate ($recipe_id, $user_id, $rating);
+                        header("views/ver_receta.php");
+                    }
+                    return $stmt->execute();
+                } catch (Exception $e) {
+                    throw new Exception("Error adding rating " . $e->getMessage());
                 }
                 break;
+
+            case 'comment':
+
+                try {
+                    if (isset($_GET['id'])) {
+                        $recipeManager -> addComment ($recipe_id, $user_id, $comment);
+                        header("views/ver_receta.php");
+                    }
+                    return $stmt->execute();
+                } catch (Exception $e) {
+                    throw new Exception("Error adding coment " . $e->getMessage());
+                }
+                
+                break;*/
 
     default:
         // Muestra la lista de recetas con búsqueda si es necesario
