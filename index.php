@@ -190,32 +190,51 @@ switch ($action) {
             }
             break;
 
-           /* case 'rate':
-                try {
-                    if (isset($_GET['id'])) {
-                        $recipeManager -> addRate ($recipe_id, $user_id, $rating);
-                        header("views/ver_receta.php");
-                    }
-                    return $stmt->execute();
-                } catch (Exception $e) {
-                    throw new Exception("Error adding rating " . $e->getMessage());
-                }
+            case 'rate':  
+                if (isset($_GET['id']) && isset($_GET['rating'])) {  
+                    $recipeId = (int)$_GET['id']; // Asegúrate de que el ID de la receta sea un entero  
+                    $rating = (int)$_GET['rating']; // Asegúrate de que la calificación sea un entero  
+                    $userId = $_SESSION['user_id']; // Obtén el ID del usuario de la sesión  
+                    
+                    // Llama al método de calificación  
+                    if ($recipeManager->rateRecipe($recipeId, $userId, $rating)) {  
+                        // Redirige a la vista de la receta después de calificar  
+                        header("Location: index.php?action=view&id=$recipeId");  
+                        exit();  
+                    } else {  
+                        // Maneja el error si no se pudo calificar  
+                        echo "Error al calificar la receta.";  
+                    }  
+                } else {  
+                    // Si no se proporcionan ID o rating, redirige o muestra un mensaje de error  
+                    echo "ID de receta o calificación no válidos.";  
+                }  
                 break;
 
-            case 'comment':
-
-                try {
-                    if (isset($_GET['id'])) {
-                        $recipeManager -> addComment ($recipe_id, $user_id, $comment);
-                        header("views/ver_receta.php");
-                    }
-                    return $stmt->execute();
-                } catch (Exception $e) {
-                    throw new Exception("Error adding coment " . $e->getMessage());
-                }
+                case 'comment':  
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {  
+                        $recipe_id = (int)$_GET['id']; // Asegúrate de que el ID de la receta sea un entero  
+                        $user_id = $_SESSION['user_id']; // Obtén el ID del usuario de la sesión  
+                        $comment = $_POST['comment']; // Obtén el texto del comentario  
                 
-                break;*/
-
+                        try {  
+                            // Llama al método para agregar el comentario  
+                            if ($recipeManager->addComment($recipe_id, $user_id, $comment)) {  
+                                // Redirige a la vista de la receta después de agregar el comentario  
+                                header("Location: index.php?action=view&id=$recipe_id");  
+                                exit();  
+                            } else {  
+                                // Maneja el error si no se pudo agregar el comentario  
+                                echo "Error al agregar el comentario.";  
+                            }  
+                        } catch (Exception $e) {  
+                            echo "Error al agregar comentario: " . $e->getMessage();  
+                        }  
+                    } else {  
+                        // Maneja el caso en que no se envía el comentario  
+                        echo "No se pudo agregar el comentario.";  
+                    }  
+                    break;
     default:
         // Muestra la lista de recetas con búsqueda si es necesario
         $recipes = $recipeManager->getAllRecipes($searchQuery);  // Pasamos el término de búsqueda
