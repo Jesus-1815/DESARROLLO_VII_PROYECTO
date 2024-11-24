@@ -180,6 +180,17 @@ $recipeUpdated = $recipeManager->updateRecipe($recipeId, $title, $description, $
             }
             break;
              
+            case 'view':
+                // ver una receta
+                if (isset($_GET['id'])) {
+                    $recipe= $recipeManager->getRecipeById($_GET['id']);
+                    $imagen = $recipeManager ->getImagesByRecipeId($_GET['id']);
+                    $ingredientes= $recipeManager->getIngredientsByRecipeId($_GET['id']);
+                    $imagen = $imagen[0] ?? null;
+                    
+                    require 'views/ver_receta.php';
+                }
+                break;
 
     default:
         // Muestra la lista de recetas con búsqueda si es necesario
