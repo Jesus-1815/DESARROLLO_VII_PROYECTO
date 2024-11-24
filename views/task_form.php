@@ -200,7 +200,7 @@ ob_start();
         <h1><i class="fas fa-utensils"></i> Agregar Receta</h1>
     </div>
 
-    <div class="container">
+    <div class="recipe-container">
         <form class="recipe-form" action="<?php echo BASE_URL; ?>/index.php?action=store" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="recipe-name"><i class="fas fa-pencil"></i> Nombre de la receta:</label>

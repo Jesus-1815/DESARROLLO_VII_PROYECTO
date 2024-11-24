@@ -10,7 +10,7 @@ $ingredients = $recipeManager->getIngredientsByRecipeId($recipe->getId());
 $steps = $recipe->getSteps();
 ?>
 
-<h2>Editar Receta: <?php echo htmlspecialchars($recipe->getTitle()); ?></h2>
+<h2 class="h2">Editar Receta: <?php echo htmlspecialchars($recipe->getTitle()); ?></h2>
 
 <form action="index.php?action=update" method="POST" enctype="multipart/form-data" class="recipe-form">
     <input type="hidden" name="recipe_id" value="<?php echo htmlspecialchars($recipe->getId()); ?>">
@@ -133,7 +133,9 @@ document.getElementById('steps-container').addEventListener('click', function(ev
 <style>
     body {
         font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
+        background-image: url('https://img.freepik.com/vector-gratis/conjunto-vectores-utensilios-e-ingredientes-cocina_53876-62219.jpg');
+    background-size: cover;
+    background-position: center;
         padding: 20px;
     }
 
@@ -212,5 +214,8 @@ document.getElementById('steps-container').addEventListener('click', function(ev
 
     .submit-btn:hover {
         background-color: #0b7dda;
+    }
+    .h2{
+        color: white;
     }
 </style>

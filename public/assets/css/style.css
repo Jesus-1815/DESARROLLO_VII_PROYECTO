@@ -30,9 +30,10 @@ body {
     color: #fff176; /* Amarillo claro */
 }
 
+
 /* Header Section */
 .header {
-    background-image: url('../loginfondo.jpg');
+    /*background-image: url('../loginfondo.jpg');*/
     background-size: cover;
     background-position: center;
     text-align: center;
@@ -116,12 +117,14 @@ form input:focus, form textarea:focus {
         transform: translateY(0);
     }
 }
-
-/* Fondo para la página de login */
-.login-background {
-    background-image: url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fes.pngtree.com%2Ffreebackground%2Fblank-recipe-book-with-cooking-utensils-and-herbs-photo_10830554.html&psig=AOvVaw1bqijD7fXNgZEwbsXkGhGb&ust=1732509099463000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCIDS2veQ9IkDFQAAAAAdAAAAABAE');
+.login-background, .register-background, .task-list, .recipe-container{
+    background-image: url('https://img.freepik.com/vector-gratis/conjunto-vectores-utensilios-e-ingredientes-cocina_53876-62219.jpg');
     background-size: cover;
     background-position: center;
+
+}
+/* Fondo para la página de login */
+.login-background {
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -209,9 +212,6 @@ form input:focus, form textarea:focus {
 }
 /* Fondo para la página de registro */
 .register-background {
-    background-image: url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fes.pngtree.com%2Ffreebackground%2Fblank-recipe-book-with-cooking-utensils-and-herbs-photo_10830554.html&psig=AOvVaw1bqijD7fXNgZEwbsXkGhGb&ust=1732509099463000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCIDS2veQ9IkDFQAAAAAdAAAAABAE'); /* Ruta relativa a tu imagen */
-    background-size: cover;
-    background-position: center;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -458,7 +458,6 @@ body {
     max-width: 1200px;
     margin: 40px auto;
     padding: 20px;
-    background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
