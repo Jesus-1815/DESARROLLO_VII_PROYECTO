@@ -40,17 +40,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/assets/css/style.css">
 </head>
-<body>
-    <h1>Iniciar Sesión</h1>
-    <form action="" method="POST">
-        <input type="text" name="email" placeholder="Correo" required>
-        <input type="password" name="password" placeholder="Contraseña" required>
-        <button type="submit">Entrar</button>
-    </form>
-    <?php if (isset($error)) echo "<p>$error</p>"; ?>
-    <a href="registro.php">Registrarse</a>
-    <a href="forgot-password.php">¿Olvidaste tu contraseña?</a>
+<body class="login-background">
+    <div class="login-container">
+        <h1>Iniciar Sesión</h1>
+        <form action="" method="POST">
+            <input type="text" name="email" placeholder="Correo" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <?php if (isset($error)) echo "<p style='color: red;'>$error</p>"; ?>
+        <a href="registro.php">Registrarse</a>
+        <a href="forgot-password.php">¿Olvidaste tu contraseña?</a>
+    </div>
 </body>
 </html>
+

@@ -35,17 +35,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/assets/css/style.css">
 </head>
-<body>
-    <h1>Registro</h1>
-    <form action="" method="POST">
-        <input type="text" name="username" placeholder="Usuario" required>
-        <input type="text" name="email" placeholder="Correo" required>
-        <input type="password" name="password" placeholder="Contraseña" required>
-        <button type="submit">Registrarse</button>
-    </form>
-    <?php if (!empty($error)) echo "<p style='color: red;'>$error</p>"; ?>
-    <a href="login.php">Iniciar sesión</a>
+<body class="register-background">
+    <div class="form-container">
+        <h1>Registro</h1>
+        <form action="" method="POST">
+            <input type="text" name="username" placeholder="Usuario" required>
+            <input type="text" name="email" placeholder="Correo" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">Registrarse</button>
+        </form>
+        <?php if (!empty($error)) echo "<p class='error-message'>$error</p>"; ?>
+        <div class="links">
+            <a href="login.php">Iniciar sesión</a>
+        </div>
+    </div>
 </body>
 </html>
+

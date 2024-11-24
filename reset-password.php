@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
 <head>
     <meta charset="UTF-8">
     <title>Restablecer Contraseña</title>
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/assets/css/style.css">
 </head>
 <body>
     <h1>Restablecer Contraseña</h1>

@@ -16,16 +16,22 @@
             echo $pageTitle; 
         ?></h2>
         <?php if ($pageTitle !== 'Inicio'): ?>
-            <a href="index.php" class="home-link">Volver al Inicio</a>  <!-- Botón que redirige a la página principal -->
+            <a href="index.php" class="home-link">
+    <i class="fas fa-home"></i> Volver al Inicio
+</a>  <!-- Botón que redirige a la página principal -->
         <?php endif; ?>
     </div>
 
     <div class="header-center">
-        <a href="support.php" class="support-btn">Soporte</a> <!-- Botón que redirige al formulario de soporte -->
+    <a href="support.php" class="support-btn">
+    <i class="fas fa-headset"></i> Soporte
+</a> <!-- Botón que redirige al formulario de soporte -->
     </div>
 
     <div class="header-right">
-        <a href="logout.php" class="logout-btn">Cerrar sesión</a>
+    <a href="logout.php" class="logout-btn">
+    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+</a>
     </div>
     
 </header>

@@ -224,8 +224,5 @@ switch ($action) {
         require 'views/task_list.php';
         break;
 }
-
-
-
 ?>
 
