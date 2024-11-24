@@ -117,7 +117,7 @@ form input:focus, form textarea:focus {
         transform: translateY(0);
     }
 }
-.login-background, .register-background, .task-list, .recipe-container{
+.login-background, .register-background, .task-list, .ver-container{
     background-image: url('https://img.freepik.com/vector-gratis/conjunto-vectores-utensilios-e-ingredientes-cocina_53876-62219.jpg');
     background-size: cover;
     background-position: center;

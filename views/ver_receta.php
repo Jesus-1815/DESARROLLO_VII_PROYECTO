@@ -2,6 +2,7 @@
 // Iniciamos el buffer de salida
 ob_start();
 ?>
+<div class="ver-container">
 <div class="recipe-container">
     <style>
         /* Contenedor general */
@@ -14,6 +15,10 @@ ob_start();
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     font-family: Arial, sans-serif;
     background-color: #fff;
+}
+
+.recipe-container h2{
+    color: black;
 }
 
 /* Encabezado */
@@ -222,4 +227,5 @@ ob_start();
     <?php endif; 
     $content = ob_get_clean();
     require 'layout.php';?>
+</div>
 </div>
