@@ -1,75 +1,45 @@
 <?php
-// Iniciamos el buffer de salida
-ob_start();
+// Verifica que la receta exista y se haya cargado correctamente
+if (!isset($recipe)) {
+    echo "Receta no encontrada.";
+    exit;
+}
+
+// Obtén los ingredientes asociados a la receta
+$ingredients = $recipeManager->getIngredientsByRecipeId($recipe->getId());
+$steps = $recipe->getSteps();
 ?>
 
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Receta: <?php echo $recipe->name; ?></title>
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/assets/css/style.css">
-</head>
-<body>
-    <h1>Editar Receta: <?php echo $recipe->name; ?></h1>
-    <form action="<?php echo BASE_URL; ?>/index.php?action=update" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="recipe_id" value="<?php echo $recipe->id; ?>">
+<h2>Editar Receta: <?php echo htmlspecialchars($recipe->getTitle()); ?></h2>
 
-        <label for="recipe-name">Nombre de la receta:</label>
-        <input type="text" id="recipe-name" name="recipe_name" value="<?php echo $recipe->name; ?>" maxlength="100" required>
+<form action="index.php?action=update" method="POST" enctype="multipart/form-data" class="recipe-form">
+    <input type="hidden" name="recipe_id" value="<?php echo htmlspecialchars($recipe->getId()); ?>">
 
-        <label for="prep-time">Tiempo de preparación (en minutos):</label>
-        <input type="number" id="prep-time" name="prep_time" min="1" max="500" value="<?php echo $recipe->prep_time; ?>" required>
+    <!-- Nombre de la receta -->
+    <div class="form-group">
+        <label for="recipe_name">Nombre de la receta:</label>
+        <input type="text" id="recipe_name" name="recipe_name" value="<?php echo htmlspecialchars($recipe->getTitle()); ?>" required>
+    </div>
 
-        <label>Ingredientes:</label>
-        <div id="ingredients-container">
-            <?php foreach ($recipe->ingredients as $ingredient): ?>
-                <div class="ingredient-row">
-                    <input type="number" name="quantity[]" value="<?php echo $ingredient['quantity']; ?>" placeholder="Cantidad" min="0" step="0.1" required>
-                    <select name="unit[]" required>
-                        <!-- Opciones de unidades como antes -->
-                    </select>
-                    <input type="text" name="ingredient[]" value="<?php echo $ingredient['name']; ?>" placeholder="Ingrediente" maxlength="50" required>
-                </div>
-            <?php endforeach; ?>
-        </div>
-        <div class="actions">
-            <button type="button" id="add-ingredient">Más</button>
-            <button type="button" id="remove-ingredient" class="remove">Menos</button>
-        </div>
-
-        <label for="steps">Pasos a seguir:</label>
-        <div id="steps-container">
-            <?php foreach ($recipe->steps as $step): ?>
-                <div class="step-row">
-                    <textarea name="steps[]" rows="3" placeholder="Describe un paso" required><?php echo $step; ?></textarea>
-                </div>
-            <?php endforeach; ?>
-        </div>
-        <div class="actions">
-            <button type="button" id="add-step">Más</button>
-            <button type="button" id="remove-step" class="remove">Menos</button>
-        </div>
-
+    <!-- Descripción de la receta -->
+    <div class="form-group">
         <label for="description">Descripción:</label>
-        <textarea id="description" name="description" rows="3" placeholder="Ej. Receta especial para fiestas" required><?php echo $recipe->description; ?></textarea>
+        <textarea id="description" name="description" required><?php echo htmlspecialchars($recipe->getDescription()); ?></textarea>
+    </div>
 
-        <button type="submit" id="submit-button">Guardar Receta</button>
-    </form>
+    <!-- Tiempo de preparación -->
+    <div class="form-group">
+        <label for="prep_time">Tiempo de preparación:</label>
+        <input type="text" id="prep_time" name="prep_time" value="<?php echo htmlspecialchars($recipe->getPrepTime()); ?>" required>
+    </div>
 
-    <script>
-        const ingredientsContainer = document.getElementById('ingredients-container');
-        const addIngredientButton = document.getElementById('add-ingredient');
-        const removeIngredientButton = document.getElementById('remove-ingredient');
-        const stepsContainer = document.getElementById('steps-container');
-        const addStepButton = document.getElementById('add-step');
-        const removeStepButton = document.getElementById('remove-step');
-
-        // Agregar una fila de ingredientes
-        addIngredientButton.addEventListener('click', () => {
-            const ingredientRow = document.createElement('div');
-            ingredientRow.classList.add('ingredient-row');
-
-            ingredientRow.innerHTML = `
-                <input type="number" name="quantity[]" placeholder="Cantidad" min="0" step="0.1" required>
+    <!-- Ingredientes -->
+    <h3>Ingredientes:</h3>
+    <div id="ingredients-container">
+        <?php foreach ($ingredients as $index => $ingredient): ?>
+            <div class="ingredient-item">
+                <input type="text" name="ingredient[]" value="<?php echo htmlspecialchars($ingredient['name']); ?>" placeholder="Ingrediente" required>
+                <input type="number" name="quantity[]" value="<?php echo htmlspecialchars($ingredient['quantity']); ?>" placeholder="Cantidad" required>
                 <select name="unit[]" required>
                     <option value="tazas">Tazas</option>
                     <option value="oz">Onzas</option>
@@ -80,49 +50,167 @@ ob_start();
                     <option value="kg">Kilogramos</option>
                     <option value="Cda">Cucharadas</option>
                     <option value="cdta">Cucharaditas</option>
-                    <option value="u">Unidades</option>
                 </select>
-                <input type="text" name="ingredient[]" placeholder="Ingrediente" maxlength="50" required>
-            `;
+                <button type="button" class="remove-ingredient">Eliminar</button>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <button type="button" id="add-ingredient">Agregar ingrediente</button>
 
-            ingredientsContainer.appendChild(ingredientRow);
-        });
+    <!-- Pasos -->
+    <h3>Pasos:</h3>
+    <div id="steps-container">
+        <?php foreach ($steps as $step): ?>
+            <div class="step-item">
+                <textarea name="steps[]" required><?php echo htmlspecialchars($step); ?></textarea>
+                <button type="button" class="remove-step">Eliminar</button>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <button type="button" id="add-step">Agregar paso</button>
 
-        // Eliminar la última fila de ingredientes
-        removeIngredientButton.addEventListener('click', () => {
-            const rows = ingredientsContainer.getElementsByClassName('ingredient-row');
-            if (rows.length > 1) {
-                ingredientsContainer.removeChild(rows[rows.length - 1]);
-            }
-        });
+    <!-- Imágenes -->
+    <h3>Imágenes (opcional):</h3>
+    <input type="file" name="recipe_images[]" multiple><br>
 
-        // Agregar una fila de pasos
-        addStepButton.addEventListener('click', () => {
-            const stepRow = document.createElement('div');
-            stepRow.classList.add('step-row');
+    <!-- Botón de envío -->
+    <button type="submit" class="submit-btn">Actualizar receta</button>
+</form>
 
-            stepRow.innerHTML = `
-                <textarea name="steps[]" rows="3" placeholder="Describe un paso" required></textarea>
-            `;
+<script>
+// Agregar ingredientes dinámicamente
+document.getElementById('add-ingredient').addEventListener('click', function() {
+    const container = document.getElementById('ingredients-container');
+    const newIngredient = document.createElement('div');
+    newIngredient.classList.add('ingredient-item');
+    newIngredient.innerHTML = `
+        <input type="text" name="ingredient[]" placeholder="Ingrediente" required>
+        <input type="number" name="quantity[]" placeholder="Cantidad" required>
+        <select name="unit[]" required>
+            <option value="tazas">Tazas</option>
+            <option value="oz">Onzas</option>
+            <option value="lb">Libras</option>
+            <option value="ml">Mililitros</option>
+            <option value="l">Litros</option>
+            <option value="gr">Gramos</option>
+            <option value="kg">Kilogramos</option>
+            <option value="Cda">Cucharadas</option>
+            <option value="cdta">Cucharaditas</option>
+        </select>
+        <button type="button" class="remove-ingredient">Eliminar</button>
+    `;
+    container.appendChild(newIngredient);
+});
 
-            stepsContainer.appendChild(stepRow);
-        });
+// Eliminar ingredientes
+document.getElementById('ingredients-container').addEventListener('click', function(event) {
+    if (event.target.classList.contains('remove-ingredient')) {
+        event.target.closest('.ingredient-item').remove();
+    }
+});
 
-        // Eliminar la última fila de pasos
-        removeStepButton.addEventListener('click', () => {
-            const rows = stepsContainer.getElementsByClassName('step-row');
-            if (rows.length > 1) {
-                stepsContainer.removeChild(rows[rows.length - 1]);
-            }
-        });
-    </script>
-</body>
-</html>
+// Agregar pasos dinámicamente
+document.getElementById('add-step').addEventListener('click', function() {
+    const container = document.getElementById('steps-container');
+    const newStep = document.createElement('div');
+    newStep.classList.add('step-item');
+    newStep.innerHTML = `
+        <textarea name="steps[]" required></textarea>
+        <button type="button" class="remove-step">Eliminar</button>
+    `;
+    container.appendChild(newStep);
+});
 
-<?php
-// Guardamos el contenido del buffer en la variable $content
-$content = ob_get_clean();
-// Incluimos el layout
-require 'layout.php';
-?>
+// Eliminar pasos
+document.getElementById('steps-container').addEventListener('click', function(event) {
+    if (event.target.classList.contains('remove-step')) {
+        event.target.closest('.step-item').remove();
+    }
+});
+</script>
 
+<!-- Agregar un CSS interno para mejorar el diseño -->
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+    }
+
+    .recipe-form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin: auto;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .ingredient-item, .step-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .ingredient-item input, .step-item textarea {
+        margin-right: 10px;
+    }
+
+    .ingredient-item button, .step-item button {
+        margin-left: 10px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .ingredient-item button:hover, .step-item button:hover {
+        background-color: #d32f2f;
+    }
+
+    #add-ingredient, #add-step {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    #add-ingredient:hover, #add-step:hover {
+        background-color: #45a049;
+    }
+
+    .submit-btn {
+        background-color: #2196F3;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .submit-btn:hover {
+        background-color: #0b7dda;
+    }
+</style>

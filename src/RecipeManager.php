@@ -32,27 +32,25 @@ class RecipeManager {
     
     
     // Agregar ingrediente a la receta
-    public function addIngredientToRecipe($recipeId, $ingredientName, $quantity) {
-        if (!$recipeId) {
-            throw new Exception("El ID de la receta no puede ser NULL.");
+    public function addIngredientToRecipe($recipeId, $ingredientName, $quantity, $unit = null) {
+        try {
+            // Inserta el ingrediente en la receta con la unidad de medida
+            $stmt = $this->db->prepare("
+                INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
+                SELECT :recipe_id, id, :quantity, :unit
+                FROM ingredients WHERE name = :ingredient_name
+            ");
+            $stmt->bindParam(':recipe_id', $recipeId);  // Asegúrate de pasar el `recipe_id`
+            $stmt->bindParam(':ingredient_name', $ingredientName);
+            $stmt->bindParam(':quantity', $quantity);
+            $stmt->bindParam(':unit', $unit);
+    
+            return $stmt->execute();
+        } catch (Exception $e) {
+            throw new Exception("Error adding ingredient to recipe: " . $e->getMessage());
         }
-    
-        // Resto de la lógica
-        $stmt = $this->db->prepare("SELECT id FROM ingredients WHERE name = ?");
-        $stmt->execute([$ingredientName]);
-        $ingredientId = $stmt->fetchColumn();
-    
-        if (!$ingredientId) {
-            $stmt = $this->db->prepare("INSERT INTO ingredients (name) VALUES (?)");
-            $stmt->execute([$ingredientName]);
-            $ingredientId = $this->db->lastInsertId();
-        }
-    
-        $stmt = $this->db->prepare("INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)");
-        $stmt->execute([$recipeId, $ingredientId, $quantity]);
     }
-    
-    
+        
     // Obtener receta por ID
     public function getRecipeById($id) {
     try {
@@ -120,43 +118,41 @@ public function getAllRecipes($searchQuery = '') {
 }
 
     // Actualizar receta
-    public function updateRecipe($id, $title, $description, $prep_time, $steps) {
+    public function updateRecipe($recipeId, $title, $description, $prepTime, $ingredients, $steps) {
         try {
-            // Actualizar receta
+            // Actualiza la información básica de la receta
             $stmt = $this->db->prepare("
                 UPDATE recipes 
-                SET title = ?, description = ?, prep_time = ? 
+                SET title = ?, description = ?, prep_time = ?
                 WHERE id = ?
             ");
-            $stmt->execute([$title, $description, $prep_time, $id]);
+            $stmt->execute([$title, $description, $prepTime, $recipeId]);
     
-            // Eliminar relaciones existentes en recipe_steps
-            $stmt = $this->db->prepare("DELETE FROM recipe_steps WHERE recipe_id = ?");
-            $stmt->execute([$id]);
+            // Elimina ingredientes antiguos
+            $stmt = $this->db->prepare("DELETE FROM recipe_ingredients WHERE recipe_id = ?");
+            $stmt->execute([$recipeId]);
     
-            $stepIds = [];
-    
-            // Agregar nuevos pasos
-            foreach ($steps as $stepText) {
-                $stmt = $this->db->prepare("SELECT id FROM steps WHERE step_text = ?");
-                $stmt->execute([$stepText]);
-                $step = $stmt->fetch();
-    
-                if (!$step) {
-                    $stmt = $this->db->prepare("INSERT INTO steps (step_text) VALUES (?)");
-                    $stmt->execute([$stepText]);
-                    $stepId = $this->db->lastInsertId();
-                } else {
-                    $stepId = $step['id'];
-                }
-    
-                $stepIds[] = $stepId;
+            // Inserta los nuevos ingredientes
+            foreach ($ingredients as $ingredient) {
+                $stmt = $this->db->prepare("
+                    INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
+                    SELECT ?, id, ?, ?
+                    FROM ingredients WHERE name = ?
+                ");
+                $stmt->execute([$recipeId, $ingredient['quantity'], $ingredient['unit'], $ingredient['name']]);
             }
     
-            // Insertar nuevos pasos
-            foreach ($stepIds as $stepId) {
-                $stmt = $this->db->prepare("INSERT INTO recipe_steps (recipe_id, step_id) VALUES (?, ?)");
-                $stmt->execute([$id, $stepId]);
+            // Elimina los pasos antiguos
+            $stmt = $this->db->prepare("DELETE FROM recipe_steps WHERE recipe_id = ?");
+            $stmt->execute([$recipeId]);
+    
+            // Inserta los nuevos pasos
+            foreach ($steps as $index => $step) {
+                $stmt = $this->db->prepare("
+                    INSERT INTO recipe_steps (recipe_id, step_order, step_text) 
+                    VALUES (?, ?, ?)
+                ");
+                $stmt->execute([$recipeId, $index + 1, $step]);
             }
     
             return true;
@@ -165,10 +161,12 @@ public function getAllRecipes($searchQuery = '') {
         }
     }
     
+    
+    
     // Obtener ingredientes por receta
     public function getIngredientsByRecipeId($recipe_id) {
         $stmt = $this->db->prepare("
-            SELECT i.name, ri.quantity, ri.unit 
+            SELECT i.name, ri.quantity 
             FROM ingredients i
             JOIN recipe_ingredients ri ON i.id = ri.ingredient_id
             WHERE ri.recipe_id = ?
@@ -176,6 +174,7 @@ public function getAllRecipes($searchQuery = '') {
         $stmt->execute([$recipe_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
 
     public function addImageToRecipe($recipeId, $imagePath) {
         try {
@@ -199,6 +198,16 @@ public function getAllRecipes($searchQuery = '') {
         $stmt = $this->db->prepare("DELETE FROM recipes WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+    public function clearRecipeIngredients($recipeId) {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM recipe_ingredients WHERE recipe_id = ?");
+            $stmt->execute([$recipeId]);
+        } catch (Exception $e) {
+            throw new Exception("Error clearing recipe ingredients: " . $e->getMessage());
+        }
+    }
+    
 }
 ?>
 
