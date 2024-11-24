@@ -11,7 +11,7 @@ class Step {
         $this->id = $data['id'] ?? null;
         $this->recipeId = $data['recipe_id'];
         $this->stepNumber = $data['step_number'];
-        $this->description = $data['description'];
+        $this->description = $data['step_text'];
         $this->createdAt = $data['created_at'] ?? null;
     }
 }
