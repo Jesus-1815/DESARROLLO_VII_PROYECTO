@@ -1,5 +1,4 @@
 <?php
-
 require_once 'Database.php';
 require_once 'Step.php';
 
@@ -10,34 +9,48 @@ class StepManager {
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function createStep($recipeId, $stepNumber, $description) {
-        $stmt = $this->db->prepare("INSERT INTO steps (recipe_id, step_number, description) VALUES (?, ?, ?)");
-        return $stmt->execute([$recipeId, $stepNumber, $description]);
+    // Crear paso
+    public function createStep($recipeId, $stepNumber, $stepText) {
+        $stmt = $this->db->prepare("
+            INSERT INTO steps (recipe_id, step_text, step_number) 
+            VALUES (?, ?, ?)
+        ");
+        return $stmt->execute([$recipeId, $stepText, $stepNumber]);
     }
 
+    // Obtener pasos por receta
     public function getStepsByRecipeId($recipeId) {
-        $stmt = $this->db->prepare("SELECT * FROM steps WHERE recipe_id = ? ORDER BY step_number ASC");
+        $stmt = $this->db->prepare("
+            SELECT id, step_text, step_number 
+            FROM steps 
+            WHERE recipe_id = ? 
+            ORDER BY step_number ASC
+        ");
         $stmt->execute([$recipeId]);
-        $steps = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $steps[] = new Step($row);
-        }
-        return $steps;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function updateStep($id, $stepNumber, $description) {
-        $stmt = $this->db->prepare("UPDATE steps SET step_number = ?, description = ? WHERE id = ?");
-        return $stmt->execute([$stepNumber, $description, $id]);
+    // Actualizar paso
+    public function updateStep($id, $stepNumber, $stepText) {
+        $stmt = $this->db->prepare("
+            UPDATE steps 
+            SET step_number = ?, step_text = ? 
+            WHERE id = ?
+        ");
+        return $stmt->execute([$stepNumber, $stepText, $id]);
     }
 
+    // Borrar paso por ID
     public function deleteStep($id) {
         $stmt = $this->db->prepare("DELETE FROM steps WHERE id = ?");
         return $stmt->execute([$id]);
     }
 
+    // Borrar todos los pasos de una receta
     public function deleteStepsByRecipeId($recipeId) {
         $stmt = $this->db->prepare("DELETE FROM steps WHERE recipe_id = ?");
         return $stmt->execute([$recipeId]);
     }
 }
+
 ?>
