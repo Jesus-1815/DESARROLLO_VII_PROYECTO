@@ -261,26 +261,54 @@ public function getAllRecipes($searchQuery = '') {
             // Verificar si ya existe una calificación  
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM ratings WHERE user_id = ? AND recipe_id = ?");  
             $stmt->execute([$userId, $recipeId]);  
+    
             if ($stmt->fetchColumn()) {  
-                throw new Exception("El usuario ha calificado ya esta receta.");  
+                // Actualizar la calificación existente  
+                $sql = "UPDATE ratings SET rating = :rating WHERE user_id = :user_id AND recipe_id = :recipe_id";  
+            } else {  
+                // Insertar nueva calificación  
+                $sql = "INSERT INTO ratings (user_id, recipe_id, rating) VALUES (:user_id, :recipe_id, :rating)";  
             }  
     
-            $sql = "INSERT INTO ratings (user_id, recipe_id, rating) VALUES (:user_id, :recipe_id, :rating)";  
-            $stmt = $this->db->prepare($sql);   
-    
+            // Preparar y ejecutar la consulta  
+            $stmt = $this->db->prepare($sql);  
             $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);  
             $stmt->bindValue(':recipe_id', $recipeId, PDO::PARAM_INT);  
             $stmt->bindValue(':rating', $rating, PDO::PARAM_INT);  
     
-            if ($stmt->execute()) {  
-                return true;  
-            } else {  
-                return false;  
-            }  
+            return $stmt->execute();  
         } catch (Exception $e) {  
-            throw new Exception("Error rating recipe: " . $e->getMessage());  
+            throw new Exception("Error al calificar la receta: " . $e->getMessage());  
         }  
     }
+    
+
+    public function getAverageRating ($recipeId) {  
+        try {  
+            // Verificar si la receta existe  
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM recipes WHERE id = ?");  
+            $stmt->execute([$recipeId]);  
+            if (!$stmt->fetchColumn()) {  
+                throw new Exception("La receta con ID $recipeId no existe.");  
+            }  
+    
+            // Obtener todas las calificaciones de la receta  
+            $stmt = $this->db->prepare("SELECT AVG(rating) AS average_rating FROM ratings WHERE recipe_id = ?");  
+            $stmt->execute([$recipeId]);  
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);  
+    
+            // Si no hay calificaciones, retornar 0 como promedio  
+            if (!$result || $result['average_rating'] === null) {  
+                return 0;  
+            }  
+    
+            // Retornar el promedio redondeado a 2 decimales  
+            return round($result['average_rating'], 2);  
+        } catch (Exception $e) {  
+            throw new Exception("Error retrieving recipe rating: " . $e->getMessage());  
+        }  
+    }
+    
 
     public function addComment($recipeId, $userId, $comment) {  
         try {  
@@ -291,6 +319,33 @@ public function getAllRecipes($searchQuery = '') {
             throw new Exception("Error al agregar comentario: " . $e->getMessage());  
         }  
     }
+
+    public function getComments($recipeId) {
+        try {
+            // Verificar si la receta existe
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM recipes WHERE id = ?");
+            $stmt->execute([$recipeId]);
+            if (!$stmt->fetchColumn()) {
+                throw new Exception("La receta con ID $recipeId no existe.");
+            }
+    
+        
+            $stmt = $this->db->prepare("
+                SELECT c.comment, u.username 
+                FROM comments c
+                JOIN users u ON c.user_id = u.id
+                WHERE c.recipe_id = ?
+            ");
+            $stmt->execute([$recipeId]);
+            $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            return $comments; 
+        } catch (Exception $e) {
+            throw new Exception("Error al obtener comentarios: " . $e->getMessage());
+        }
+    }
+    
+    
     
 }
 ?>

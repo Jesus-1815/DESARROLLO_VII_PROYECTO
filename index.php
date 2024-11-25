@@ -150,9 +150,11 @@ switch ($action) {
     if (isset($_GET['id'])) {
         $recipe = $recipeManager->getRecipeById($_GET['id']);
         $imagen = $recipeManager->getImagesByRecipeId($_GET['id']);
-        $ingredientes = $recipeManager->getIngredientsByRecipeId($_GET['id']);
-        $steps = $recipeManager->getStepsByRecipeId($_GET['id']); // Agrega esta línea para los pasos
         $imagen = $imagen[0] ?? null;
+        $ingredientes = $recipeManager->getIngredientsByRecipeId($_GET['id']);
+        $steps = $recipeManager->getStepsByRecipeId($_GET['id']);
+        $rating= $recipeManager->getAverageRating($_GET['id']);
+        $comment= $recipeManager->getComments($_GET['id']);
 
         require 'views/ver_receta.php';
     }
@@ -161,9 +163,9 @@ switch ($action) {
 
             case 'rate':  
                 if (isset($_GET['id']) && isset($_GET['rating'])) {  
-                    $recipeId = (int)$_GET['id']; // Asegúrate de que el ID de la receta sea un entero  
-                    $rating = (int)$_GET['rating']; // Asegúrate de que la calificación sea un entero  
-                    $userId = $_SESSION['user_id']; // Obtén el ID del usuario de la sesión  
+                    $recipeId = (int)$_GET['id'];  
+                    $rating = (int)$_GET['rating'];
+                    $userId = $_SESSION['user_id']; 
                     
                     // Llama al método de calificación  
                     if ($recipeManager->rateRecipe($recipeId, $userId, $rating)) {  
@@ -181,19 +183,18 @@ switch ($action) {
                 break;
 
                 case 'comment':  
-                    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {  
-                        $recipe_id = (int)$_GET['id']; // Asegúrate de que el ID de la receta sea un entero  
-                        $user_id = $_SESSION['user_id']; // Obtén el ID del usuario de la sesión  
-                        $comment = $_POST['comment']; // Obtén el texto del comentario  
+                    if (isset($_GET['id'])&& isset($_POST['comment'])) {  
+                        $recipe_id = (int)$_GET['id']; 
+                        $user_id = $_SESSION['user_id']; //ID del usuario de la sesión  
+                        $comment = $_POST['comment']; //texto del comentario  
                 
                         try {  
                             // Llama al método para agregar el comentario  
                             if ($recipeManager->addComment($recipe_id, $user_id, $comment)) {  
-                                // Redirige a la vista de la receta después de agregar el comentario  
                                 header("Location: index.php?action=view&id=$recipe_id");  
                                 exit();  
                             } else {  
-                                // Maneja el error si no se pudo agregar el comentario  
+                    
                                 echo "Error al agregar el comentario.";  
                             }  
                         } catch (Exception $e) {  
@@ -205,7 +206,6 @@ switch ($action) {
                     }  
                     break;
     default:
-        // Muestra la lista de recetas con búsqueda si es necesario
         $recipes = $recipeManager->getAllRecipes($searchQuery);  // Pasamos el término de búsqueda
         require 'views/task_list.php';
         break;

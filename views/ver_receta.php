@@ -1,12 +1,14 @@
 <?php
 // Iniciamos el buffer de salida
 ob_start();
-if (isset($_SESSION['user_id'])): ?>  
-    <button onclick="mostrarFormularioComentario()">Agregar comentario</button>  
-    <button onclick="mostrarRating()">Calificar receta</button>  
-<?php else: ?>  
-    <p>Debes estar logueado para calificar o comentar.</p>  
-<?php endif; ?>
+
+    if (isset($_SESSION['user_id'])): ?>  
+        <?php if ($_SESSION['user_id'] != $recipe->getUserId()): ?>  
+            <button onclick="mostrarRating()">Calificar receta</button>  
+        <?php endif; ?>  
+    <?php else: ?>  
+        <p>Debes estar logueado para calificar o comentar.</p>  
+    <?php endif; ?>  
 
 <div class="recipe-container">
     <style>
@@ -407,9 +409,13 @@ textarea:focus {
     <div class="recipe-header">  
         <h1 class="recipe-title"><?php echo htmlspecialchars($recipe->getTitle()); ?></h1>  
         <div class="rating">  
-            <span class="star">&#9733;</span>  
-<span class="rating-average">(<?php echo htmlspecialchars($recipe->getAverageRating()); ?>)</span>  
-<span class="rating-average">(Calificación no disponible)</span>
+        <span class="star">&#9733;</span>
+        <?php if ($rating !== null): ?>
+            <span class="rating-average">(<?php echo htmlspecialchars($rating); ?>)</span>
+        <?php else: ?>
+            <span class="rating-average">(Calificación no disponible)</span>
+        <?php endif; ?>
+
         </div>  
         <p class="prep-time">⏲️ <?php echo htmlspecialchars($recipe->getPrepTime()); ?></p>  
     </div>  
@@ -443,15 +449,15 @@ textarea:focus {
 
     <div class="recipe-comments">  
         <h2>Comentarios</h2>  
-        <?php if (!empty($comments)): ?>  
-            <?php foreach ($comments as $comment): ?>  
+        <?php if (!empty($comment)): ?>  
+            <?php foreach ($comment as $comments): ?>  
                 <div class="comment">  
-                    <p><strong><?php echo htmlspecialchars($comment['username']); ?>:</strong> <?php echo htmlspecialchars($comment['comment_text']); ?></p>  
+                    <p><strong><?php echo htmlspecialchars($comments['username']); ?>:</strong> <?php echo htmlspecialchars($comments['comment']); ?></p>  
                 </div>  
             <?php endforeach; ?>  
         <?php else: ?>  
             <p>No hay comentarios aún.</p>  
-        <?php endif; ?>  
+        <?php endif; ?> 
     </div>  
 
     <?php if (isset($_SESSION['user_id'])): ?>  
@@ -460,9 +466,8 @@ textarea:focus {
             <a href="index.php?action=edit&id=<?= $recipe->getId() ?>" class="btn">Editar</a>  
             <a href="index.php?action=delete&id=<?= $recipe->getId() ?>" class="btn" onclick="return confirm('¿Eliminar esta receta?')">Eliminar</a>  
         <?php else: ?>  
-            <!-- Botones para los usuarios que no son creadores -->  
+            
             <button onclick="mostrarFormularioComentario()">Agregar comentario</button>  
-            <button onclick="mostrarRating()">Calificar receta</button>  
         <?php endif; ?>  
     <?php else: ?>  
         <p>Debes estar logueado para calificar o comentar.</p>  
@@ -493,9 +498,8 @@ textarea:focus {
         <div class="modal-content">
             <span class="close" onclick="document.getElementById('commentModal').style.display='none'">&times;</span>
             <h2>Agregar Comentario</h2>
-            <form action="<?php echo BASE_URL; ?>/index.php?action=comment&id="method="POST">
-                <textarea name="comment_text" placeholder="Escribe tu comentario" required></textarea>
-                <input type="hidden" name="recipe_id" value="<?php echo $_GET['id']; ?>">
+            <form action="<?php echo BASE_URL; ?>/index.php?action=comment&id=<?php echo $_GET['id']; ?>" method="POST">
+                <textarea name="comment" placeholder="Escribe tu comentario" required></textarea>
                 <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
                 <button type="submit">Enviar comentario</button>
             </form>

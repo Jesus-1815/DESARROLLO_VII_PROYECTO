@@ -67,16 +67,6 @@ class Recipe {
     public function setImagePath($imagePath) {
         $this->imagePath = $imagePath;
     }
-    public function getAverageRating() {  
-        // Aquí deberías calcular la calificación promedio basada en los comentarios/ranking  
-        // Este es un ejemplo simple que asume que tienes acceso a un array de ratings  
-        $ratings = $this->getRatings(); // Método hipotético que debe retornar un array de calificaciones  
-        if (empty($ratings)) return 0; // Si no hay calificaciones, retorna 0  
-
-        $total = array_sum($ratings); // Suma todos los ratings  
-        $count = count($ratings); // Cuenta cuántos ratings hay  
-        return round($total / $count, 1); // Retorna la calificación promedio redondeada  
-    }  
 
     // Método que obtiene las calificaciones de la receta (puedes implementar esto según tu base de datos)  
     public function getRatings() {  
