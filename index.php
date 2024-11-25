@@ -168,8 +168,9 @@ switch ($action) {
                     $userId = $_SESSION['user_id']; 
                     
                     // Llama al método de calificación  
-                    if ($recipeManager->rateRecipe($recipeId, $userId, $rating)) {  
+                    if ($recipeManager->rateRecipe($userId, $recipeId, $rating)) {  
                         // Redirige a la vista de la receta después de calificar  
+                        var_dump($recipeId);
                         header("Location: index.php?action=view&id=$recipeId");  
                         exit();  
                     } else {  
