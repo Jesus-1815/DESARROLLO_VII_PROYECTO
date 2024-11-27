@@ -32,8 +32,11 @@ ob_start();
                     <p><strong>Descripción:</strong> <?= htmlspecialchars($recipe->getDescription()) ?></p>
                     <div>
                         <a href="index.php?action=view&id=<?= $recipe->getId() ?>" class="btn">Ver</a>
-                        <a href="index.php?action=edit&id=<?= $recipe->getId() ?>" class="btn">Editar</a> <!-- Enlace de editar -->
-                        <a href="index.php?action=delete&id=<?= $recipe->getId() ?>" class="btn" onclick="return confirm('¿Eliminar esta receta?')">Eliminar</a>
+                        <?php if ($_SESSION['user_id'] == $recipe->getUserId()): ?>  
+                            <a href="index.php?action=edit&id=<?= $recipe->getId() ?>" class="btn">Editar</a> <!-- Enlace de editar -->
+                            <a href="index.php?action=delete&id=<?= $recipe->getId() ?>" class="btn" onclick="return confirm('¿Eliminar esta receta?')">Eliminar</a>                        
+                        <?php endif; ?> 
+                       
                     </div>
                 </li>
             <?php endforeach; ?>
